@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediConsulta - Login</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS compartido -->
+  <link rel="stylesheet" href="/public/css/auth.css">
+</head>
+
+<body>
+
+  <div class="card shadow card-custom text-center">
+
+    <div class="logo-icon">+</div>
+
+    <h2 class="fw-bold text-success">MediConsulta</h2>
+    <p class="text-muted mb-4">Iniciar sesión</p>
+
+    <form action="/login" method="POST">
+
+      <!-- Nombre -->
+      <div class="mb-3 text-start">
+        <label class="form-label">Nombre de usuario</label>
+        <input type="text" name="nombre" class="form-control" placeholder="Juan Pérez" required>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="mb-4 text-start">
+        <label class="form-label">Contraseña</label>
+        <input type="password" name="password" class="form-control" placeholder="********" required>
+      </div>
+
+      <button type="submit" class="btn btn-custom text-white w-100">
+        Iniciar sesión
+      </button>
+
+    </form>
+
+    <p class="mt-4">
+      ¿No tienes cuenta?
+      <a href="/views/register.ejs" class="text-success fw-semibold text-decoration-none">
+        Regístrate
+      </a>
+    </p>
+
+  </div>
+
+</body>
+</html>
