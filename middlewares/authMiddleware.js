@@ -1,38 +1,45 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-exports.verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+//  Middleware para roles
+const autorizarRoles = (...rolesPermitidos) => {
+  return (req, res, next) => {
+    const rolUsuario = (req.usuario?.rol || "").toLowerCase().trim();
+    const rolesNormalizados = rolesPermitidos.map(r => r.toLowerCase().trim());
 
-  if (!authHeader) {
-    return res.status(401).json({
-      message: "Acceso denegado. Token requerido."
-    });
-  }
+    console.log(`👮 autorizarRoles() -> Rol detectado: "${rolUsuario}" | Roles permitidos: [${rolesNormalizados}]`);
 
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.split(" ")[1]
-    : null;
+    if (!rolesNormalizados.includes(rolUsuario)) {
+      console.log("⛔ BLOQUEADO: Usuario no tiene permiso");
+      return res.status(403).json({ mensaje: 'No tienes permiso para acceder a esta ruta' });
+    }
+
+    console.log("✅ ACCESO PERMITIDO");
+    next();
+  };
+};
+
+const verificarToken = (req, res, next) => {
+  const token = req.cookies.token;
 
   if (!token) {
-    return res.status(401).json({
-      message: "Formato de token inválido."
-    });
+    return res.redirect('/login');
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded; // guardamos info del usuario
+    req.usuario = {
+      id: decoded.id,
+      nombre: decoded.nombre,
+      rol: decoded.rol,
+      sexo: decoded.sexo
+    };
+
     next();
   } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        message: "Token expirado. Inicia sesión nuevamente."
-      });
-    }
-
-    return res.status(403).json({
-      message: "Token inválido."
-    });
+    res.clearCookie('token');
+    return res.redirect('/login');
   }
 };
+
+module.exports = {autorizarRoles, verificarToken };

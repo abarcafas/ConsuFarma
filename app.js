@@ -1,30 +1,27 @@
-// Importaciones
 const express = require('express');
-const mongoose = require('mongoose');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+
 require('dotenv').config();
 
-// Inicializar app
+const authRoutes = require('./routes/authRoutes');
+
 const app = express();
+app.use(cookieParser());
 
-// Middlewares
-app.use(express.json()); // Permite recibir JSON en requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-    res.send('Servidor funcionando correctamente 🚀');
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// 🔥 IMPORTANTE: SIN PARÉNTESIS
+app.use('/', authRoutes);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor en http://localhost:${PORT}`);
 });
-
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log('✅ Conectado a MongoDB');
-        
-        // Levantar servidor solo cuando conecta la BD
-        app.listen(process.env.PORT, () => {
-            console.log(`🚀 Servidor corriendo en puerto ${process.env.PORT}`);
-        });
-
-    })
-    .catch((error) => {
-        console.error('❌ Error conectando a MongoDB:', error);
-    });
