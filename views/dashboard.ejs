@@ -2,29 +2,289 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediConsulta — Consultar medicamento</title>
+  <link rel="stylesheet" href="/public/css/dashboardUser.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-light">
 
-  <div class="container mt-5">
+<body class="flex flex-col h-screen overflow-hidden font-['Nunito',sans-serif]">
 
-    <div class="card shadow p-4">
-      <h2 class="text-success">Bienvenido al Dashboard</h2>
-      <hr>
+  <!-- ===== TOPBAR ===== -->
+  <header class="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3
+                 bg-white/92 backdrop-blur border-b border-[#1a7a5e]/10
+                 shadow-[0_2px_16px_rgba(26,122,94,0.08)]">
 
-      <p><strong>Usuario:</strong> <%= usuario.nombre %></p>
-      <p><strong>ID:</strong> <%= usuario.id %></p>
-      <p><strong>Rol:</strong> 
-        <%= usuario.rol === 1 ? "ADMIN" : "USUARIO" %>
-      </p>
+    <div class="flex items-center gap-3">
+      <!-- Botón hamburguesa (solo móvil) -->
+      <button id="sidebar-toggle"
+              class="sm:hidden w-9 h-9 rounded-xl bg-[#e8f5f0] flex items-center justify-center"
+              aria-label="Abrir historial">
+        <svg class="w-5 h-5 fill-[#1a7a5e]" viewBox="0 0 24 24">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="#1a7a5e" stroke-width="2"
+                stroke-linecap="round" fill="none"/>
+        </svg>
+      </button>
 
-      <a href="/logout" class="btn btn-danger mt-3">
-        Cerrar sesión
-      </a>
+      <!-- Logo -->
+      <div class="w-10 h-10 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+                  rounded-xl flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+          <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V7a1 1 0 0 1 1-1z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="font-['Playfair_Display',serif] text-lg sm:text-xl text-[#135c47] leading-tight">
+          MediConsulta
+        </h2>
+        <span class="text-[10px] text-[#5a7a6e] font-bold uppercase tracking-wide leading-none">
+          Asistente de medicamentos
+        </span>
+      </div>
     </div>
 
+    <!-- Avatar -->
+    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#b8e8d8]
+                flex items-center justify-center text-white font-extrabold text-xs cursor-pointer">
+      Dr
+    </div>
+  </header>
+
+  <!-- ===== LAYOUT ===== -->
+  <div class="relative flex flex-1 overflow-hidden">
+
+    <!-- Overlay oscuro (móvil) -->
+    <div id="sidebar-overlay"
+         class="fixed inset-0 bg-black/40 z-30 sm:hidden"
+         onclick="closeSidebar()">
+    </div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar"
+           class="fixed sm:relative z-40 sm:z-auto
+                  w-64 h-full
+                  bg-white/90 backdrop-blur
+                  border-r border-[#1a7a5e]/10
+                  flex flex-col p-3 overflow-y-auto scroll-thin
+                  transition-transform duration-300
+                  -translate-x-full sm:translate-x-0">
+
+      <h3 class="text-[10px] font-bold uppercase tracking-widest text-[#5a7a6e] px-2 pt-1 pb-3">
+        Historial de búsqueda
+      </h3>
+
+      <!-- Ítem activo -->
+      <div class="px-3 py-2.5 rounded-xl bg-[#1a7a5e]/10 mb-1 cursor-pointer">
+        <p class="text-sm font-bold text-[#1a2e26]">Ibuprofeno</p>
+        <p class="text-[11px] text-[#5a7a6e] mt-0.5">Hoy, 10:24 am</p>
+      </div>
+
+      <div class="px-3 py-2.5 rounded-xl hover:bg-[#1a7a5e]/05 mb-1 cursor-pointer transition">
+        <p class="text-sm font-bold text-[#1a2e26]">Paracetamol</p>
+        <p class="text-[11px] text-[#5a7a6e] mt-0.5">Ayer, 3:15 pm</p>
+      </div>
+
+      <div class="px-3 py-2.5 rounded-xl hover:bg-[#1a7a5e]/05 mb-1 cursor-pointer transition">
+        <p class="text-sm font-bold text-[#1a2e26]">Amoxicilina</p>
+        <p class="text-[11px] text-[#5a7a6e] mt-0.5">18 Feb, 9:00 am</p>
+      </div>
+
+      <div class="px-3 py-2.5 rounded-xl hover:bg-[#1a7a5e]/05 mb-1 cursor-pointer transition">
+        <p class="text-sm font-bold text-[#1a2e26]">Losartán</p>
+        <p class="text-[11px] text-[#5a7a6e] mt-0.5">15 Feb, 5:30 pm</p>
+      </div>
+
+    </aside>
+
+    <!-- ===== CHAT PRINCIPAL ===== -->
+    <main class="flex-1 flex flex-col overflow-hidden chat-bg">
+
+      <!-- Mensajes -->
+      <div class="flex-1 overflow-y-auto scroll-thin px-4 sm:px-8 py-6 flex flex-col gap-4">
+
+        <!-- Bienvenida -->
+        <div class="text-center py-10 px-4 m-auto max-w-sm">
+          <div class="w-20 h-20 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+                      rounded-3xl inline-flex items-center justify-center mb-4
+                      shadow-[0_12px_32px_rgba(26,122,94,0.25)]">
+            <svg class="w-10 h-10 fill-white" viewBox="0 0 24 24">
+              <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V7a1 1 0 0 1 1-1z"/>
+            </svg>
+          </div>
+          <h2 class="font-['Playfair_Display',serif] text-2xl text-[#135c47] mb-2">
+            ¿Qué medicamento deseas consultar?
+          </h2>
+          <p class="text-sm text-[#5a7a6e] leading-relaxed">
+            Escribe el nombre del medicamento y obtén información detallada al instante.
+          </p>
+        </div>
+
+        <!-- Burbuja usuario (ejemplo) -->
+        <div class="flex flex-row-reverse gap-2.5 max-w-[80%] sm:max-w-[65%] self-end animate-fadeIn">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4a9e87] to-[#25a87e]
+                      flex-shrink-0 flex items-center justify-center
+                      text-white font-extrabold text-[10px]">
+            Yo
+          </div>
+          <div class="bg-gradient-to-br from-[#1a7a5e] to-[#25a87e] text-white
+                      px-4 py-3 rounded-[18px] rounded-br-[4px]
+                      text-sm leading-relaxed shadow-md">
+            Ibuprofeno
+          </div>
+        </div>
+
+        <!-- Burbuja bot (ejemplo) -->
+        <div class="flex gap-2.5 max-w-[80%] sm:max-w-[65%] animate-fadeIn">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+                      flex-shrink-0 flex items-center justify-center
+                      text-white font-extrabold text-[10px]">
+            MC
+          </div>
+          <div class="bg-white/95 text-[#1a2e26]
+                      px-4 py-3 rounded-[18px] rounded-bl-[4px]
+                      text-sm leading-relaxed shadow-md">
+            <strong class="block font-extrabold text-[15px] mb-1">💊 Ibuprofeno</strong>
+            Antiinflamatorio no esteroideo (AINE) — Selecciona qué información deseas consultar:
+          </div>
+        </div>
+
+        <!-- ===== TARJETA DE FILTROS (boceto) ===== -->
+        <div class="bg-white/97 rounded-2xl p-5
+                    shadow-[0_8px_32px_rgba(26,122,94,0.15)]
+                    w-full max-w-sm sm:max-w-md animate-fadeIn">
+
+          <h3 class="font-extrabold text-[#135c47] text-base">Ibuprofeno</h3>
+          <p class="text-xs text-[#5a7a6e] mt-0.5 mb-4">Elige una categoría para ver detalles</p>
+
+          <!-- Grid 2×2 -->
+          <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+
+            <button type="button"
+                    class="flex flex-col items-center py-4 px-3 rounded-2xl
+                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
+                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
+                           hover:-translate-y-0.5 hover:shadow-md
+                           active:translate-y-0 transition-all cursor-pointer">
+              <span class="text-2xl mb-1.5">📋</span>
+              <span class="text-xs font-bold text-[#135c47]">Info general</span>
+            </button>
+
+            <button type="button"
+                    class="flex flex-col items-center py-4 px-3 rounded-2xl
+                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
+                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
+                           hover:-translate-y-0.5 hover:shadow-md
+                           active:translate-y-0 transition-all cursor-pointer">
+              <span class="text-2xl mb-1.5">🩺</span>
+              <span class="text-xs font-bold text-[#135c47]">Indicaciones / uso</span>
+            </button>
+
+            <button type="button"
+                    class="flex flex-col items-center py-4 px-3 rounded-2xl
+                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
+                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
+                           hover:-translate-y-0.5 hover:shadow-md
+                           active:translate-y-0 transition-all cursor-pointer">
+              <span class="text-2xl mb-1.5">💉</span>
+              <span class="text-xs font-bold text-[#135c47]">Dosificación</span>
+            </button>
+
+            <button type="button"
+                    class="flex flex-col items-center py-4 px-3 rounded-2xl
+                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
+                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
+                           hover:-translate-y-0.5 hover:shadow-md
+                           active:translate-y-0 transition-all cursor-pointer">
+              <span class="text-2xl mb-1.5">⚠️</span>
+              <span class="text-xs font-bold text-[#135c47]">Advertencias</span>
+            </button>
+
+          </div>
+
+          <!-- Botón ancho -->
+          <button type="button"
+                  class="w-full py-3.5 rounded-2xl text-sm font-bold text-[#135c47]
+                         border-2 border-[#1a7a5e]/15
+                         bg-gradient-to-r from-[#1a7a5e]/06 to-[#25a87e]/10
+                         hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/12
+                         hover:-translate-y-0.5 transition-all">
+            ✨ Información especial
+          </button>
+
+        </div>
+        <!-- /tarjeta filtros -->
+
+        <!-- Burbuja respuesta (ejemplo) -->
+        <div class="flex gap-2.5 max-w-[80%] sm:max-w-[65%] animate-fadeIn">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+                      flex-shrink-0 flex items-center justify-center
+                      text-white font-extrabold text-[10px]">
+            MC
+          </div>
+          <div class="bg-white/95 text-[#1a2e26]
+                      px-4 py-3 rounded-[18px] rounded-bl-[4px]
+                      text-sm leading-relaxed shadow-md">
+            <strong class="block font-extrabold text-[15px] mb-1">📋 Información general</strong>
+            El ibuprofeno es un antiinflamatorio no esteroideo (AINE). Actúa inhibiendo la síntesis
+            de prostaglandinas responsables del dolor e inflamación. Disponible en tabletas,
+            cápsulas y suspensión oral.
+          </div>
+        </div>
+
+      </div>
+      <!-- /mensajes -->
+
+      <!-- ===== INPUT ===== -->
+      <div class="px-4 sm:px-6 py-3 sm:py-4
+                  bg-white/90 backdrop-blur
+                  border-t border-[#1a7a5e]/10
+                  flex gap-3 items-center">
+
+        <div class="flex-1 flex items-center
+                    bg-white rounded-2xl
+                    border-2 border-[#1a7a5e]/15
+                    px-4 shadow-sm
+                    focus-within:border-[#1a7a5e] transition">
+          <input type="text"
+                 name="medicamento"
+                 placeholder="Escribe un medicamento, ej: Ibuprofeno..."
+                 class="flex-1 py-3 text-sm text-[#1a2e26] bg-transparent
+                        outline-none placeholder:text-[#9ab5aa]">
+        </div>
+
+        <button type="button"
+                class="w-12 h-12 flex-shrink-0 rounded-2xl
+                       bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+                       flex items-center justify-center
+                       shadow-[0_4px_16px_rgba(26,122,94,0.3)]
+                       hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(26,122,94,0.4)]
+                       active:translate-y-0 transition-all">
+          <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+
+      </div>
+
+    </main>
   </div>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    }
+  </script>
 
 </body>
 </html>

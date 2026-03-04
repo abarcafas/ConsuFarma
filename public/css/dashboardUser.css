@@ -1,0 +1,30 @@
+  /* Fondo tipo WhatsApp con iconos médicos */
+    .chat-bg {
+      background-color: #d4f0e5;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg opacity='0.1' fill='%231a7a5e'%3E%3Cellipse cx='30' cy='25' rx='18' ry='10' transform='rotate(-30 30 25)'/%3E%3Crect x='70' y='8' width='8' height='22' rx='4'/%3E%3Cellipse cx='120' cy='30' rx='14' ry='8' transform='rotate(45 120 30)'/%3E%3Crect x='10' y='72' width='8' height='22' rx='4' transform='rotate(15 14 83)'/%3E%3Crect x='88' y='55' width='20' height='6' rx='3'/%3E%3Crect x='94' y='49' width='6' height='20' rx='3'/%3E%3Cellipse cx='40' cy='110' rx='18' ry='9' transform='rotate(20 40 110)'/%3E%3Crect x='108' y='90' width='8' height='24' rx='4' transform='rotate(-20 112 102)'/%3E%3Crect x='140' y='115' width='14' height='4' rx='2'/%3E%3Crect x='145' y='110' width='4' height='14' rx='2'/%3E%3Cellipse cx='70' cy='140' rx='16' ry='8' transform='rotate(10 70 140)'/%3E%3Crect x='10' y='145' width='16' height='4' rx='2'/%3E%3Crect x='16' y='139' width='4' height='16' rx='2'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .animate-fadeIn { animation: fadeIn 0.3s ease; }
+
+    /* Sidebar overlay en móvil */
+    #sidebar-overlay {
+      display: none;
+    }
+    #sidebar-overlay.open {
+      display: block;
+    }
+    #sidebar.open {
+      transform: translateX(0) !important;
+    }
+
+    /* Scrollbars */
+    .scroll-thin::-webkit-scrollbar { width: 4px; }
+    .scroll-thin::-webkit-scrollbar-thumb {
+      background: rgba(26,122,94,0.2);
+      border-radius: 10px;
+    }
