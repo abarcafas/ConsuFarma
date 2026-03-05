@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { registro, login } = require('../controllers/authController');
-const { verificarToken, autorizarRoles } = require('../middlewares/authMiddleware');
+const {autorizarRoles, proteger } = require('../middlewares/authMiddleware');
 
 // Ruta principal
 router.get('/', (req, res) => {
@@ -22,14 +22,12 @@ router.get('/register', (req, res) => {
 router.post('/registro', registro);
 
 // Dashboard usuario
-router.get('/dashboard', verificarToken, (req, res) => {
-  res.render('dashboard', { usuario: req.usuario });
-});
+router.get('/dashboard',proteger,autorizarRoles('usuario', 'admin'),(req, res) => {res.render('dashboard', { usuario: req.usuario });});
 
 // Dashboard admin
 router.get(
   '/admin/dashboard',
-  verificarToken,
+  proteger,
   autorizarRoles('admin'),
   (req, res) => {
     res.render('adminDashboard', { usuario: req.usuario });

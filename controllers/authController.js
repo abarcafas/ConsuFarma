@@ -1,7 +1,6 @@
 const pool = require('../db');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
+const generateToken = require('../utils/generateToken');
 require('dotenv').config();
 
 
@@ -54,17 +53,17 @@ const login = async (req, res) => {
     const { nombre, password } = req.body;
 
     const result = await pool.query(
-      `SELECT 
-          u.id,
-          u.nombre,
-          u.password_hash,
-          r.nombre AS rol
-       FROM usuarios u
-       JOIN roles r ON u.rol_id = r.id
-       WHERE u.nombre = $1`,
-      [nombre]
-    );
-
+  `SELECT 
+      u.id,
+      u.nombre,
+      u.password_hash,
+      u.idioma,          
+      r.nombre AS rol
+   FROM usuarios u
+   JOIN roles r ON u.rol_id = r.id
+   WHERE u.nombre = $1`,
+  [nombre]
+);
     if (result.rows.length === 0) {
       return res.status(400).send("Usuario no encontrado");
     }
@@ -78,16 +77,7 @@ const login = async (req, res) => {
     }
 
     // 🔐 Crear JWT con ROL EN TEXTO
-    const token = jwt.sign(
-      {
-        id: usuario.id,
-        nombre: usuario.nombre,
-        rol: usuario.rol 
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "2h" }
-    );
-
+    const token = generateToken(usuario);
     // 🍪 Guardar en cookie
     res.cookie('token', token, {
       httpOnly: true,

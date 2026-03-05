@@ -1,45 +1,41 @@
 const jwt = require('jsonwebtoken');
 
-//  Middleware para roles
-const autorizarRoles = (...rolesPermitidos) => {
-  return (req, res, next) => {
-    const rolUsuario = (req.usuario?.rol || "").toLowerCase().trim();
-    const rolesNormalizados = rolesPermitidos.map(r => r.toLowerCase().trim());
+// 🔐 Middleware para verificar autenticación
+const proteger = (req, res, next) => {
+  try {
+    const token = req.cookies.token;
 
-    console.log(`👮 autorizarRoles() -> Rol detectado: "${rolUsuario}" | Roles permitidos: [${rolesNormalizados}]`);
-
-    if (!rolesNormalizados.includes(rolUsuario)) {
-      console.log("⛔ BLOQUEADO: Usuario no tiene permiso");
-      return res.status(403).json({ mensaje: 'No tienes permiso para acceder a esta ruta' });
+    if (!token) {
+      return res.redirect("/login");
     }
 
-    console.log("✅ ACCESO PERMITIDO");
-    next();
-  };
-};
-
-const verificarToken = (req, res, next) => {
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.redirect('/login');
-  }
-
-  try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.usuario = {
-      id: decoded.id,
-      nombre: decoded.nombre,
-      rol: decoded.rol,
-      sexo: decoded.sexo
-    };
+    console.log("🔐 Usuario autenticado:", decoded); // 👈 AQUÍ VA
+
+    req.usuario = decoded;
 
     next();
   } catch (error) {
     res.clearCookie('token');
-    return res.redirect('/login');
+    return res.redirect("/login");
   }
 };
 
-module.exports = {autorizarRoles, verificarToken };
+// 👮 Middleware para verificar roles
+const autorizarRoles = (...rolesPermitidos) => {
+  return (req, res, next) => {
+    const rolUsuario = (req.usuario?.rol || "").toLowerCase().trim();
+    const rolesNormalizados = rolesPermitidos.map(r =>
+      r.toLowerCase().trim()
+    );
+
+    if (!rolesNormalizados.includes(rolUsuario)) {
+      return res.status(403).send("No tienes permiso para acceder a esta ruta");
+    }
+
+    next();
+  };
+};
+
+module.exports = { proteger, autorizarRoles };
