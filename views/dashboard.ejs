@@ -102,8 +102,8 @@
     <main class="flex-1 flex flex-col overflow-hidden chat-bg">
 
       <!-- Mensajes -->
-      <div class="flex-1 overflow-y-auto scroll-thin px-4 sm:px-8 py-6 flex flex-col gap-4">
-
+<div id="chatContainer"
+     class="flex-1 overflow-y-auto scroll-thin px-4 sm:px-8 py-6 flex flex-col gap-4">
         <!-- Bienvenida -->
         <div class="text-center py-10 px-4 m-auto max-w-sm">
           <div class="w-20 h-20 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
@@ -238,33 +238,35 @@
 
       <!-- ===== INPUT ===== -->
       <div class="px-4 sm:px-6 py-3 sm:py-4
-                  bg-white/90 backdrop-blur
-                  border-t border-[#1a7a5e]/10
-                  flex gap-3 items-center">
+            bg-white/90 backdrop-blur
+            border-t border-[#1a7a5e]/10
+            flex gap-3 items-center">
 
-        <div class="flex-1 flex items-center
-                    bg-white rounded-2xl
-                    border-2 border-[#1a7a5e]/15
-                    px-4 shadow-sm
-                    focus-within:border-[#1a7a5e] transition">
-          <input type="text"
-                 name="medicamento"
-                 placeholder="Escribe un medicamento, ej: Ibuprofeno..."
-                 class="flex-1 py-3 text-sm text-[#1a2e26] bg-transparent
-                        outline-none placeholder:text-[#9ab5aa]">
-        </div>
+  <div class="flex-1 flex items-center
+              bg-white rounded-2xl
+              border-2 border-[#1a7a5e]/15
+              px-4 shadow-sm
+              focus-within:border-[#1a7a5e] transition">
+    <input type="text"
+           id="medicamentoInput"
+           placeholder="Escribe un medicamento, ej: Ibuprofeno..."
+           class="flex-1 py-3 text-sm text-[#1a2e26] bg-transparent
+                  outline-none placeholder:text-[#9ab5aa]">
+  </div>
 
-        <button type="button"
-                class="w-12 h-12 flex-shrink-0 rounded-2xl
-                       bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-                       flex items-center justify-center
-                       shadow-[0_4px_16px_rgba(26,122,94,0.3)]
-                       hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(26,122,94,0.4)]
-                       active:translate-y-0 transition-all">
-          <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-          </svg>
-        </button>
+  <button id="enviarBtn"
+          type="button"
+          class="w-12 h-12 flex-shrink-0 rounded-2xl
+                 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+                 flex items-center justify-center
+                 shadow-[0_4px_16px_rgba(26,122,94,0.3)]
+                 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(26,122,94,0.4)]
+                 active:translate-y-0 transition-all">
+    <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+    </svg>
+  </button>
+
 
       </div>
 
@@ -286,5 +288,92 @@
     }
   </script>
 
+<script>
+const input = document.getElementById("medicamentoInput");
+const boton = document.getElementById("enviarBtn");
+const chat = document.getElementById("chatContainer");
+
+function agregarMensajeUsuario(texto) {
+  const div = document.createElement("div");
+  div.className = "flex flex-row-reverse gap-2.5 max-w-[80%] sm:max-w-[65%] self-end";
+
+  div.innerHTML = `
+    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4a9e87] to-[#25a87e]
+                flex-shrink-0 flex items-center justify-center
+                text-white font-extrabold text-[10px]">
+      Yo
+    </div>
+    <div class="bg-gradient-to-br from-[#1a7a5e] to-[#25a87e] text-white
+                px-4 py-3 rounded-[18px] rounded-br-[4px]
+                text-sm leading-relaxed shadow-md">
+      ${texto}
+    </div>
+  `;
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function agregarMensajeBot(texto) {
+  const div = document.createElement("div");
+  div.className = "flex gap-2.5 max-w-[80%] sm:max-w-[65%]";
+
+  div.innerHTML = `
+    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+                flex-shrink-0 flex items-center justify-center
+                text-white font-extrabold text-[10px]">
+      MC
+    </div>
+    <div class="bg-white/95 text-[#1a2e26]
+                px-4 py-3 rounded-[18px] rounded-bl-[4px]
+                text-sm leading-relaxed shadow-md">
+      ${texto}
+    </div>
+  `;
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function enviarConsulta() {
+  const medicamento = input.value.trim();
+
+  if (!medicamento) return;
+
+  agregarMensajeUsuario(medicamento);
+  input.value = "";
+
+  agregarMensajeBot("⏳ Consultando información...");
+
+  try {
+    const response = await fetch("/consultar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ medicamento })
+    });
+
+    const data = await response.json();
+
+    // Elimina mensaje de cargando
+    chat.removeChild(chat.lastChild);
+
+    agregarMensajeBot(`<strong>💊 Resultado:</strong><br><br>${data.respuesta}`);
+
+  } catch (error) {
+    chat.removeChild(chat.lastChild);
+    agregarMensajeBot("❌ Ocurrió un error al consultar.");
+  }
+}
+
+boton.addEventListener("click", enviarConsulta);
+
+input.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    enviarConsulta();
+  }
+});
+</script>
 </body>
 </html>

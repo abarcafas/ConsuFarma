@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const consultaRoutes = require('./routes/consultaRoutes');
 
 const app = express();
 app.use(cookieParser());
@@ -19,6 +20,7 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // 🔥 IMPORTANTE: SIN PARÉNTESIS
 app.use('/', authRoutes);
+app.use('/', consultaRoutes);
 
 const PORT = process.env.PORT || 3000;
 
