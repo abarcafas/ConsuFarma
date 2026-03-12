@@ -1,0 +1,134 @@
+-- ============================
+-- EXTENSION PARA UUID
+-- ============================
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ============================
+-- TABLA ROLES
+-- ============================
+
+CREATE TABLE roles (
+  id INT PRIMARY KEY,
+  nombre VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Insertar roles iniciales
+INSERT INTO roles (id, nombre) VALUES
+(1, 'ADMIN'),
+(2, 'USUARIO');
+
+-- ============================
+-- TABLA USUARIOS
+-- ============================
+
+CREATE TABLE usuarios (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  rol_id INT NOT NULL,
+
+  nombre VARCHAR(100) NOT NULL,
+  genero VARCHAR(150) NOT NULL,
+  edad INT NOT NULL,
+
+  password_hash TEXT NOT NULL,
+
+  idioma VARCHAR(5) NOT NULL DEFAULT 'es', -- es / en
+  pais VARCHAR(50),
+
+  fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_usuario_rol
+  FOREIGN KEY (rol_id) REFERENCES roles(id)
+);
+
+-- ============================
+-- TABLA MEDICAMENTOS
+-- ============================
+
+CREATE TABLE medicamentos (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+  generic_name_en VARCHAR(255),
+  generic_name_es VARCHAR(255),
+
+  -- Información general
+  product_type_en VARCHAR(150),
+  product_type_es VARCHAR(150),
+
+  route_en VARCHAR(100),
+  route_es VARCHAR(100),
+
+  pharm_class_epc_en VARCHAR(255),
+  pharm_class_epc_es VARCHAR(255),
+
+  -- Indicaciones
+  indications_and_usage_en TEXT,
+  indications_and_usage_es TEXT,
+
+  -- Dosificación
+  dosage_and_administration_en TEXT,
+  dosage_and_administration_es TEXT,
+
+  -- Advertencias
+  warnings_en TEXT,
+  warnings_es TEXT,
+
+  do_not_use_en TEXT,
+  do_not_use_es TEXT,
+
+  ask_doctor_en TEXT,
+  ask_doctor_es TEXT,
+
+  stop_use_en TEXT,
+  stop_use_es TEXT,
+
+  keep_out_of_reach_of_children_en TEXT,
+  keep_out_of_reach_of_children_es TEXT,
+
+  -- Información especial
+  pregnancy_or_breast_feeding_en TEXT,
+  pregnancy_or_breast_feeding_es TEXT,
+
+  spl_unclassified_section_en TEXT,
+  spl_unclassified_section_es TEXT,
+
+  fecha_guardado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion_api TIMESTAMP
+);
+
+-- ============================
+-- TABLA CONVERSACIONES
+-- ============================
+
+CREATE TABLE conversaciones (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+  usuario_id UUID NOT NULL,
+  medicamento_id UUID NOT NULL,
+
+  titulo VARCHAR(255),
+  fecha_inicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_conversacion_usuario
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+
+  CONSTRAINT fk_conversacion_medicamento
+  FOREIGN KEY (medicamento_id) REFERENCES medicamentos(id)
+);
+
+-- ============================
+-- TABLA MENSAJES
+-- ============================
+
+CREATE TABLE mensajes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+  conversacion_id UUID NOT NULL,
+  contenido TEXT NOT NULL,
+
+  es_usuario BOOLEAN NOT NULL,
+  fecha_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_mensaje_conversacion
+  FOREIGN KEY (conversacion_id) REFERENCES conversaciones(id)
+);
