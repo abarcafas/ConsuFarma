@@ -1,379 +1,187 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediConsulta — Consultar medicamento</title>
-  <link rel="stylesheet" href="/public/css/dashboardUser.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MediConsulta — Consultar medicamento</title>
+
+<link rel="stylesheet" href="/public/css/dashboardUser.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
 <body class="flex flex-col h-screen overflow-hidden font-['Nunito',sans-serif]">
 
-  <!-- ===== TOPBAR ===== -->
-  <header class="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3
-                 bg-white/92 backdrop-blur border-b border-[#1a7a5e]/10
-                 shadow-[0_2px_16px_rgba(26,122,94,0.08)]">
+<header class="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3
+bg-white/92 backdrop-blur border-b border-[#1a7a5e]/10
+shadow-[0_2px_16px_rgba(26,122,94,0.08)]">
 
-    <div class="flex items-center gap-3">
-      <!-- Botón hamburguesa (solo móvil) -->
-      <button id="sidebar-toggle"
-              class="sm:hidden w-9 h-9 rounded-xl bg-[#e8f5f0] flex items-center justify-center"
-              aria-label="Abrir historial">
-        <svg class="w-5 h-5 fill-[#1a7a5e]" viewBox="0 0 24 24">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke="#1a7a5e" stroke-width="2"
-                stroke-linecap="round" fill="none"/>
-        </svg>
-      </button>
+<div class="flex items-center gap-3">
 
-      <!-- Logo -->
-      <div class="w-10 h-10 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-                  rounded-xl flex items-center justify-center flex-shrink-0">
-        <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
-          <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V7a1 1 0 0 1 1-1z"/>
-        </svg>
-      </div>
-      <div>
-        <h2 class="font-['Playfair_Display',serif] text-lg sm:text-xl text-[#135c47] leading-tight">
-          MediConsulta
-        </h2>
-        <span class="text-[10px] text-[#5a7a6e] font-bold uppercase tracking-wide leading-none">
-          Asistente de medicamentos
-        </span>
-      </div>
-    </div>
+<button id="sidebar-toggle"
+class="sm:hidden w-9 h-9 rounded-xl bg-[#e8f5f0] flex items-center justify-center">
 
-    <!-- Avatar -->
-    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#b8e8d8]
-                flex items-center justify-center text-white font-extrabold text-xs cursor-pointer">
-      Dr
-    </div>
-  </header>
+<svg class="w-5 h-5 fill-[#1a7a5e]" viewBox="0 0 24 24">
+<path d="M3 6h18M3 12h18M3 18h18" stroke="#1a7a5e" stroke-width="2" stroke-linecap="round" fill="none"/>
+</svg>
 
-  <!-- ===== LAYOUT ===== -->
-  <div class="relative flex flex-1 overflow-hidden">
+</button>
 
-    <!-- Overlay oscuro (móvil) -->
-    <div id="sidebar-overlay"
-         class="fixed inset-0 bg-black/40 z-30 sm:hidden"
-         onclick="closeSidebar()">
-    </div>
+<div class="w-10 h-10 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
+rounded-xl flex items-center justify-center">
 
-    <!-- ===== SIDEBAR ===== -->
-    <aside id="sidebar"
-           class="fixed sm:relative z-40 sm:z-auto
-                  w-64 h-full
-                  bg-white/90 backdrop-blur
-                  border-r border-[#1a7a5e]/10
-                  flex flex-col p-3 overflow-y-auto scroll-thin
-                  transition-transform duration-300
-                  -translate-x-full sm:translate-x-0">
+<svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+<path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
+</svg>
 
-      <h3 class="text-[10px] font-bold uppercase tracking-widest text-[#5a7a6e] px-2 pt-1 pb-3">
-        Historial de búsqueda
-      </h3>
+</div>
 
-      <!-- Ítem activo -->
-      <div class="px-3 py-2.5 rounded-xl bg-[#1a7a5e]/10 mb-1 cursor-pointer">
-        <p class="text-sm font-bold text-[#1a2e26]">Ibuprofeno</p>
-        <p class="text-[11px] text-[#5a7a6e] mt-0.5">Hoy, 10:24 am</p>
-      </div>
+<div>
 
-      <div class="px-3 py-2.5 rounded-xl hover:bg-[#1a7a5e]/05 mb-1 cursor-pointer transition">
-        <p class="text-sm font-bold text-[#1a2e26]">Paracetamol</p>
-        <p class="text-[11px] text-[#5a7a6e] mt-0.5">Ayer, 3:15 pm</p>
-      </div>
+<h2 class="font-['Playfair_Display',serif] text-lg text-[#135c47]">
+MediConsulta
+</h2>
 
-      <div class="px-3 py-2.5 rounded-xl hover:bg-[#1a7a5e]/05 mb-1 cursor-pointer transition">
-        <p class="text-sm font-bold text-[#1a2e26]">Amoxicilina</p>
-        <p class="text-[11px] text-[#5a7a6e] mt-0.5">18 Feb, 9:00 am</p>
-      </div>
+<span id="subtituloHeader" class="text-[10px] text-[#5a7a6e] font-bold uppercase">
+Asistente de medicamentos
+</span>
 
-      <div class="px-3 py-2.5 rounded-xl hover:bg-[#1a7a5e]/05 mb-1 cursor-pointer transition">
-        <p class="text-sm font-bold text-[#1a2e26]">Losartán</p>
-        <p class="text-[11px] text-[#5a7a6e] mt-0.5">15 Feb, 5:30 pm</p>
-      </div>
+</div>
 
-    </aside>
+</div>
 
-    <!-- ===== CHAT PRINCIPAL ===== -->
-    <main class="flex-1 flex flex-col overflow-hidden chat-bg">
+</header>
 
-      <!-- Mensajes -->
+<div class="flex flex-1 overflow-hidden">
+
+<!-- overlay móvil -->
+
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-30"></div>
+
+<!-- sidebar -->
+
+<aside id="sidebar"
+class="w-64 bg-white border-r border-[#1a7a5e]/10 p-3 transform -translate-x-full sm:translate-x-0 transition">
+
+<h3 id="historialTitulo" class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
+Historial de búsqueda
+</h3>
+
+</aside>
+
+<!-- contenido -->
+
+<main class="flex-1 flex flex-col overflow-hidden chat-bg">
+
 <div id="chatContainer"
-     class="flex-1 overflow-y-auto scroll-thin px-4 sm:px-8 py-6 flex flex-col gap-4">
-        <!-- Bienvenida -->
-        <div class="text-center py-10 px-4 m-auto max-w-sm">
-          <div class="w-20 h-20 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-                      rounded-3xl inline-flex items-center justify-center mb-4
-                      shadow-[0_12px_32px_rgba(26,122,94,0.25)]">
-            <svg class="w-10 h-10 fill-white" viewBox="0 0 24 24">
-              <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 3a1 1 0 0 1 1 1v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0v-3H8a1 1 0 1 1 0-2h3V7a1 1 0 0 1 1-1z"/>
-            </svg>
-          </div>
-          <h2 class="font-['Playfair_Display',serif] text-2xl text-[#135c47] mb-2">
-            ¿Qué medicamento deseas consultar?
-          </h2>
-          <p class="text-sm text-[#5a7a6e] leading-relaxed">
-            Escribe el nombre del medicamento y obtén información detallada al instante.
-          </p>
-        </div>
+class="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
 
-        <!-- Burbuja usuario (ejemplo) -->
-        <div class="flex flex-row-reverse gap-2.5 max-w-[80%] sm:max-w-[65%] self-end animate-fadeIn">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4a9e87] to-[#25a87e]
-                      flex-shrink-0 flex items-center justify-center
-                      text-white font-extrabold text-[10px]">
-            Yo
-          </div>
-          <div class="bg-gradient-to-br from-[#1a7a5e] to-[#25a87e] text-white
-                      px-4 py-3 rounded-[18px] rounded-br-[4px]
-                      text-sm leading-relaxed shadow-md">
-            Ibuprofeno
-          </div>
-        </div>
+<div class="text-center py-10 px-4 m-auto max-w-sm">
 
-        <!-- Burbuja bot (ejemplo) -->
-        <div class="flex gap-2.5 max-w-[80%] sm:max-w-[65%] animate-fadeIn">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-                      flex-shrink-0 flex items-center justify-center
-                      text-white font-extrabold text-[10px]">
-            MC
-          </div>
-          <div class="bg-white/95 text-[#1a2e26]
-                      px-4 py-3 rounded-[18px] rounded-bl-[4px]
-                      text-sm leading-relaxed shadow-md">
-            <strong class="block font-extrabold text-[15px] mb-1">💊 Ibuprofeno</strong>
-            Antiinflamatorio no esteroideo (AINE) — Selecciona qué información deseas consultar:
-          </div>
-        </div>
+<h2 id="tituloInicio"
+class="font-['Playfair_Display',serif] text-2xl text-[#135c47] mb-2">
 
-        <!-- ===== TARJETA DE FILTROS (boceto) ===== -->
-        <div class="bg-white/97 rounded-2xl p-5
-                    shadow-[0_8px_32px_rgba(26,122,94,0.15)]
-                    w-full max-w-sm sm:max-w-md animate-fadeIn">
+Selecciona primero una categoría
 
-          <h3 class="font-extrabold text-[#135c47] text-base">Ibuprofeno</h3>
-          <p class="text-xs text-[#5a7a6e] mt-0.5 mb-4">Elige una categoría para ver detalles</p>
+</h2>
 
-          <!-- Grid 2×2 -->
-          <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+<p id="subtituloInicio" class="text-sm text-[#5a7a6e]">
 
-            <button type="button"
-                    class="flex flex-col items-center py-4 px-3 rounded-2xl
-                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
-                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
-                           hover:-translate-y-0.5 hover:shadow-md
-                           active:translate-y-0 transition-all cursor-pointer">
-              <span class="text-2xl mb-1.5">📋</span>
-              <span class="text-xs font-bold text-[#135c47]">Info general</span>
-            </button>
+Luego escribe el medicamento
 
-            <button type="button"
-                    class="flex flex-col items-center py-4 px-3 rounded-2xl
-                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
-                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
-                           hover:-translate-y-0.5 hover:shadow-md
-                           active:translate-y-0 transition-all cursor-pointer">
-              <span class="text-2xl mb-1.5">🩺</span>
-              <span class="text-xs font-bold text-[#135c47]">Indicaciones / uso</span>
-            </button>
+</p>
 
-            <button type="button"
-                    class="flex flex-col items-center py-4 px-3 rounded-2xl
-                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
-                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
-                           hover:-translate-y-0.5 hover:shadow-md
-                           active:translate-y-0 transition-all cursor-pointer">
-              <span class="text-2xl mb-1.5">💉</span>
-              <span class="text-xs font-bold text-[#135c47]">Dosificación</span>
-            </button>
+</div>
 
-            <button type="button"
-                    class="flex flex-col items-center py-4 px-3 rounded-2xl
-                           border-2 border-[#1a7a5e]/15 bg-[#e8f5f0]
-                           hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/08
-                           hover:-translate-y-0.5 hover:shadow-md
-                           active:translate-y-0 transition-all cursor-pointer">
-              <span class="text-2xl mb-1.5">⚠️</span>
-              <span class="text-xs font-bold text-[#135c47]">Advertencias</span>
-            </button>
+<div class="bg-white rounded-2xl p-5 shadow-lg max-w-md">
 
-          </div>
+<h3 class="font-extrabold text-[#135c47] text-base">
+</h3>
 
-          <!-- Botón ancho -->
-          <button type="button"
-                  class="w-full py-3.5 rounded-2xl text-sm font-bold text-[#135c47]
-                         border-2 border-[#1a7a5e]/15
-                         bg-gradient-to-r from-[#1a7a5e]/06 to-[#25a87e]/10
-                         hover:border-[#1a7a5e] hover:bg-[#1a7a5e]/12
-                         hover:-translate-y-0.5 transition-all">
-            ✨ Información especial
-          </button>
+<div class="grid grid-cols-2 gap-2 mt-3">
 
-        </div>
-        <!-- /tarjeta filtros -->
+<button onclick="seleccionarFiltro('general',this)" class="filtro-btn">
+📋 <span id="filtroGeneral">Info general</span>
+</button>
 
-        <!-- Burbuja respuesta (ejemplo) -->
-        <div class="flex gap-2.5 max-w-[80%] sm:max-w-[65%] animate-fadeIn">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-                      flex-shrink-0 flex items-center justify-center
-                      text-white font-extrabold text-[10px]">
-            MC
-          </div>
-          <div class="bg-white/95 text-[#1a2e26]
-                      px-4 py-3 rounded-[18px] rounded-bl-[4px]
-                      text-sm leading-relaxed shadow-md">
-            <strong class="block font-extrabold text-[15px] mb-1">📋 Información general</strong>
-            El ibuprofeno es un antiinflamatorio no esteroideo (AINE). Actúa inhibiendo la síntesis
-            de prostaglandinas responsables del dolor e inflamación. Disponible en tabletas,
-            cápsulas y suspensión oral.
-          </div>
-        </div>
+<button onclick="seleccionarFiltro('indicaciones',this)" class="filtro-btn">
+🩺 <span id="filtroIndicaciones">Indicaciones</span>
+</button>
 
-      </div>
-      <!-- /mensajes -->
+<button onclick="seleccionarFiltro('dosificacion',this)" class="filtro-btn">
+💉 <span id="filtroDosificacion">Dosificación</span>
+</button>
 
-      <!-- ===== INPUT ===== -->
-      <div class="px-4 sm:px-6 py-3 sm:py-4
-            bg-white/90 backdrop-blur
-            border-t border-[#1a7a5e]/10
-            flex gap-3 items-center">
+<button onclick="seleccionarFiltro('advertencias',this)" class="filtro-btn">
+⚠️ <span id="filtroAdvertencias">Advertencias</span>
+</button>
 
-  <div class="flex-1 flex items-center
-              bg-white rounded-2xl
-              border-2 border-[#1a7a5e]/15
-              px-4 shadow-sm
-              focus-within:border-[#1a7a5e] transition">
-    <input type="text"
-           id="medicamentoInput"
-           placeholder="Escribe un medicamento, ej: Ibuprofeno..."
-           class="flex-1 py-3 text-sm text-[#1a2e26] bg-transparent
-                  outline-none placeholder:text-[#9ab5aa]">
-  </div>
+</div>
 
-  <button id="enviarBtn"
-          type="button"
-          class="w-12 h-12 flex-shrink-0 rounded-2xl
-                 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-                 flex items-center justify-center
-                 shadow-[0_4px_16px_rgba(26,122,94,0.3)]
-                 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(26,122,94,0.4)]
-                 active:translate-y-0 transition-all">
-    <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
-      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-    </svg>
-  </button>
+<button onclick="seleccionarFiltro('especial',this)"
+class="filtro-btn w-full mt-2">
 
+✨ <span id="filtroEspecial">Información especial</span>
 
-      </div>
+</button>
 
-    </main>
-  </div>
+</div>
 
-  <script>
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
+</div>
 
-    document.getElementById('sidebar-toggle').addEventListener('click', () => {
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('open');
-    });
+<div id="inputContainer"
+class="px-6 py-4 bg-white border-t flex gap-3">
 
-    function closeSidebar() {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('open');
-    }
-  </script>
+<input
+type="text"
+id="medicamentoInput"
+placeholder="Escribe un medicamento..."
+class="flex-1 border rounded-xl px-4 py-2">
+
+<button id="enviarBtn"
+class="px-4 py-2 bg-[#1a7a5e] text-white rounded-xl">
+
+Enviar
+
+</button>
+
+</div>
+
+</main>
+
+</div>
 
 <script>
-const input = document.getElementById("medicamentoInput");
-const boton = document.getElementById("enviarBtn");
-const chat = document.getElementById("chatContainer");
 
-function agregarMensajeUsuario(texto) {
-  const div = document.createElement("div");
-  div.className = "flex flex-row-reverse gap-2.5 max-w-[80%] sm:max-w-[65%] self-end";
+const idiomaUsuario = "<%= usuario.idioma %>";
 
-  div.innerHTML = `
-    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#4a9e87] to-[#25a87e]
-                flex-shrink-0 flex items-center justify-center
-                text-white font-extrabold text-[10px]">
-      Yo
-    </div>
-    <div class="bg-gradient-to-br from-[#1a7a5e] to-[#25a87e] text-white
-                px-4 py-3 rounded-[18px] rounded-br-[4px]
-                text-sm leading-relaxed shadow-md">
-      ${texto}
-    </div>
-  `;
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebar-overlay');
 
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
+document.getElementById('sidebar-toggle').addEventListener('click', () => {
 
-function agregarMensajeBot(texto) {
-  const div = document.createElement("div");
-  div.className = "flex gap-2.5 max-w-[80%] sm:max-w-[65%]";
+sidebar.classList.toggle('open');
+overlay.classList.toggle('open');
 
-  div.innerHTML = `
-    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-                flex-shrink-0 flex items-center justify-center
-                text-white font-extrabold text-[10px]">
-      MC
-    </div>
-    <div class="bg-white/95 text-[#1a2e26]
-                px-4 py-3 rounded-[18px] rounded-bl-[4px]
-                text-sm leading-relaxed shadow-md">
-      ${texto}
-    </div>
-  `;
-
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-async function enviarConsulta() {
-  const medicamento = input.value.trim();
-
-  if (!medicamento) return;
-
-  agregarMensajeUsuario(medicamento);
-  input.value = "";
-
-  agregarMensajeBot("⏳ Consultando información...");
-
-  try {
-    const response = await fetch("/consultar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ medicamento })
-    });
-
-    const data = await response.json();
-
-    // Elimina mensaje de cargando
-    chat.removeChild(chat.lastChild);
-
-    agregarMensajeBot(`<strong>💊 Resultado:</strong><br><br>${data.respuesta}`);
-
-  } catch (error) {
-    chat.removeChild(chat.lastChild);
-    agregarMensajeBot("❌ Ocurrió un error al consultar.");
-  }
-}
-
-boton.addEventListener("click", enviarConsulta);
-
-input.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    enviarConsulta();
-  }
 });
+
+overlay.addEventListener('click', () => {
+
+sidebar.classList.remove('open');
+overlay.classList.remove('open');
+
+});
+
 </script>
+
+<script src="/public/js/dashboardUser.js"></script>
+
 </body>
 </html>

@@ -22,7 +22,7 @@ router.get('/register', (req, res) => {
 router.post('/registro', registro);
 
 // Dashboard usuario
-router.get('/dashboard',proteger,autorizarRoles('usuario', 'admin'),(req, res) => {res.render('dashboard', { usuario: req.usuario });});
+router.get('/dashboard',proteger,autorizarRoles('usuario', 'admin'),(req, res) => {res.render('dashboard', { usuario: req.usuario, idioma:req.usuario.idioma });});
 
 // Dashboard admin
 router.get(
