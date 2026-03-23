@@ -230,3 +230,45 @@ input.addEventListener("keypress", e => {
 if(e.key === "Enter") enviarConsulta()
 
 })
+
+async function cargarHistorial() {
+
+  const res = await fetch('/api/historial')
+  const data = await res.json()
+
+  const sidebar = document.getElementById('sidebar')
+
+  // 🔥 LIMPIAR Y VOLVER A PONER EL TÍTULO
+  sidebar.innerHTML = `
+  <h3 id="historialTitulo" class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
+    ${traducciones[idioma].historial}
+  </h3>
+  `
+
+  // 🔁 AGREGAR HISTORIAL
+  data.forEach(conv => {
+    const item = document.createElement('div')
+    item.className = "p-2 cursor-pointer hover:bg-gray-100 rounded"
+    item.innerText = conv.titulo
+
+    item.onclick = () => cargarConversacion(conv.id)
+
+    sidebar.appendChild(item)
+  })
+}
+async function cargarConversacion(id) {
+  const res = await fetch(`/api/historial/${id}`)
+  const mensajes = await res.json()
+
+  const chat = document.getElementById('chatContainer')
+  chat.innerHTML = ""
+
+  mensajes.forEach(m => {
+    const div = document.createElement('div')
+    div.className = m.es_usuario ? "user-msg" : "bot-msg"
+    div.innerHTML = m.contenido
+
+    chat.appendChild(div)
+  })
+}
+cargarHistorial()
