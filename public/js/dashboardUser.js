@@ -4,6 +4,7 @@ const chat = document.getElementById("chatContainer")
 const inputContainer = document.getElementById("inputContainer")
 const mensajeInicio = document.getElementById("mensajeInicio")
 
+let conversacionId = null
 let filtrosSeleccionados = []
 
 // idioma desde JWT (inyectado en EJS)
@@ -49,6 +50,7 @@ enviar:"Send"
 
 }
 
+// 🔥 aplicar idioma
 function aplicarIdioma(id){
 
 const t = traducciones[id]
@@ -75,6 +77,7 @@ aplicarIdioma(idioma)
 inputContainer.style.display = "none"
 
 
+// 🔥 seleccionar filtros
 function seleccionarFiltro(filtro, boton){
 
 if(filtrosSeleccionados.includes(filtro)){
@@ -89,7 +92,6 @@ boton.classList.add("filtro-activo")
 
 }
 
-// mostrar input solo si hay filtros
 if(filtrosSeleccionados.length > 0){
 inputContainer.style.display = "flex"
 }else{
@@ -99,7 +101,7 @@ inputContainer.style.display = "none"
 }
 
 
-// mensaje usuario
+// 🧑 mensaje usuario
 function agregarMensajeUsuario(texto){
 
 if(mensajeInicio) mensajeInicio.style.display="none"
@@ -121,7 +123,34 @@ scrollChat()
 }
 
 
-// mensaje bot
+// 🤖 convertir JSON → HTML
+function generarHTMLDesdeJSON(data){
+
+let html = ""
+
+for(const key in data){
+
+let lista = data[key]
+
+if(!Array.isArray(lista) || lista.length === 0) continue
+
+html += `
+<div style="margin-bottom:20px">
+  <div style="font-weight:700;color:#135c47;margin-bottom:4px">
+    ${key.toUpperCase()}
+  </div>
+  <div style="font-size:14px;line-height:1.5">
+    ${lista.map(item => `<div>• ${item}</div>`).join("")}
+  </div>
+</div>
+`
+}
+
+return html
+}
+
+
+// 🤖 mensaje bot
 function agregarMensajeBot(html){
 
 if(mensajeInicio) mensajeInicio.style.display="none"
@@ -143,30 +172,23 @@ scrollChat()
 }
 
 
-// auto scroll
+// 🔽 scroll automático
 function scrollChat(){
-
 chat.scrollTop = chat.scrollHeight
-
 }
 
 
-
+// 🚀 enviar consulta
 async function enviarConsulta(){
 
 const medicamento = input.value.trim()
 
 if(!medicamento) return
 
-
 if(filtrosSeleccionados.length === 0){
-
 agregarMensajeBot(traducciones[idioma].seleccionaFiltro)
-
 return
-
 }
-
 
 agregarMensajeUsuario(medicamento)
 
@@ -177,44 +199,37 @@ agregarMensajeBot(traducciones[idioma].consultando)
 try{
 
 const response = await fetch("/consultar",{
-
 method:"POST",
-
 headers:{
 "Content-Type":"application/json"
 },
-
 body:JSON.stringify({
-
 medicamento,
-filtros:filtrosSeleccionados
-
+filtros:filtrosSeleccionados,
+conversacionId
 })
-
 })
 
 const data = await response.json()
 
-// quitar mensaje "consultando"
+if (data.conversacionId) {
+  conversacionId = data.conversacionId
+}
+// quitar "consultando"
 chat.removeChild(chat.lastChild)
 
-
 if(!data.encontrado){
-
 agregarMensajeBot(traducciones[idioma].noEncontrado)
-
 return
-
 }
 
-
-// respuesta del bot
-agregarMensajeBot(data.contenido)
+// 🔥 AQUÍ ESTÁ EL CAMBIO IMPORTANTE
+const html = generarHTMLDesdeJSON(data.contenido)
+agregarMensajeBot(html)
 
 }catch(err){
 
 chat.removeChild(chat.lastChild)
-
 agregarMensajeBot(traducciones[idioma].error)
 
 }
@@ -222,53 +237,89 @@ agregarMensajeBot(traducciones[idioma].error)
 }
 
 
-
 boton.addEventListener("click", enviarConsulta)
 
 input.addEventListener("keypress", e => {
-
 if(e.key === "Enter") enviarConsulta()
+})
+
+
+// 📜 cargar historial
+async function cargarHistorial() {
+
+const res = await fetch('/api/historial')
+const data = await res.json()
+
+const sidebar = document.getElementById('sidebar')
+
+sidebar.innerHTML = `
+<h3 id="historialTitulo" class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
+  ${traducciones[idioma].historial}
+</h3>
+`
+
+data.forEach(conv => {
+const item = document.createElement('div')
+item.className = "p-2 cursor-pointer hover:bg-gray-100 rounded"
+item.innerText = conv.titulo
+
+item.onclick = () => cargarConversacion(conv.id)
+
+sidebar.appendChild(item)
+})
+}
+
+
+// 📩 cargar conversación
+async function cargarConversacion(id) {
+
+const res = await fetch(`/api/historial/${id}`)
+const mensajes = await res.json()
+
+chat.innerHTML = ""
+
+mensajes.forEach(m => {
+
+const div = document.createElement('div')
+
+div.className = m.es_usuario 
+? "flex justify-end animate-fadeIn"
+: "flex animate-fadeIn"
+
+if(m.es_usuario){
+
+div.innerHTML = `
+<div class="bg-[#e8f5f0] border border-[#1a7a5e]/20 px-4 py-3 rounded-2xl max-w-sm shadow">
+${m.contenido}
+</div>
+`
+
+}else{
+
+let html = ""
+
+try {
+
+const data = JSON.parse(m.contenido)
+html = generarHTMLDesdeJSON(data)
+
+} catch (e) {
+
+// fallback por si hay datos viejos con HTML
+html = m.contenido
+}
+
+div.innerHTML = `
+<div class="bg-white border border-gray-200 px-4 py-3 rounded-2xl max-w-md shadow-sm">
+${html}
+</div>
+`
+}
+
+chat.appendChild(div)
 
 })
 
-async function cargarHistorial() {
-
-  const res = await fetch('/api/historial')
-  const data = await res.json()
-
-  const sidebar = document.getElementById('sidebar')
-
-  // 🔥 LIMPIAR Y VOLVER A PONER EL TÍTULO
-  sidebar.innerHTML = `
-  <h3 id="historialTitulo" class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
-    ${traducciones[idioma].historial}
-  </h3>
-  `
-
-  // 🔁 AGREGAR HISTORIAL
-  data.forEach(conv => {
-    const item = document.createElement('div')
-    item.className = "p-2 cursor-pointer hover:bg-gray-100 rounded"
-    item.innerText = conv.titulo
-
-    item.onclick = () => cargarConversacion(conv.id)
-
-    sidebar.appendChild(item)
-  })
 }
-async function cargarConversacion(id) {
-  const res = await fetch(`/api/historial/${id}`)
-  const mensajes = await res.json()
 
-  const chat = document.getElementById('chatContainer')
-  chat.innerHTML = ""
-
-  mensajes.forEach(m => {
-    const div = document.createElement('div')
-    div.className = m.es_usuario ? "user-msg" : "bot-msg"
-    div.innerHTML = m.contenido
-
-    chat.appendChild(div)
-  })
-}
 cargarHistorial()
