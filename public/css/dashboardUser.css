@@ -50,6 +50,57 @@ BOTONES DE FILTRO
 .filtro-activo span{
   color:white !important;
 }
+/* =========================
+BOTÓN NUEVA CONVERSACIÓN
+========================= */
+
+.nueva-conv-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+
+  padding:10px;
+  border-radius:12px;
+
+  background: linear-gradient(135deg,#1a7a5e,#25a87e);
+  color:white;
+
+  font-weight:700;
+  font-size:13px;
+
+  box-shadow:0 6px 18px rgba(26,122,94,0.25);
+  border: none;
+
+  transition: all .25s ease;
+}
+
+.nueva-conv-btn:hover{
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:0 10px 24px rgba(26,122,94,0.35);
+}
+
+.nueva-conv-btn:active{
+  transform: scale(0.97);
+}
+
+#sidebar {
+  width: 256px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* altura = 100% del flex padre, que ya tiene overflow:hidden */
+  align-self: stretch;
+}
+
+#sidebar-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
 
 /* animación mensajes */
 

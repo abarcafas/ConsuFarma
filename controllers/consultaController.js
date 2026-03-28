@@ -1,6 +1,6 @@
 const axios = require("axios")
 const db = require("../db")
-const {crearConversacion,guardarMensaje} = require("./historialController")
+const { crearConversacion, guardarMensaje } = require("./historialController")
 
 /* =========================
 TRADUCTOR
@@ -31,21 +31,29 @@ async function traducir(texto, from = "en", to = "es") {
 }
 
 /* =========================
-OBTENER NOMBRE EN INGLÉS
+HELPERS
 ========================= */
 
+// obtener primer valor de array
+const obtenerCampo = (campo) => campo?.[0] || ""
+
+// traducir solo si existe valor
+const traducirCampo = async (valor, from, to) => {
+  if (!valor) return ""
+  return await traducir(valor, from, to)
+}
 
 /* =========================
 CONSULTAR API OPENFDA
 ========================= */
-async function consultarAPI(nombre){
+async function consultarAPI(nombre) {
   try {
     const response = await axios.get(
       "https://api.fda.gov/drug/label.json",
       {
-        params:{
-          search:`openfda.generic_name:${nombre}`,
-          limit:1
+        params: {
+          search: `openfda.generic_name:${nombre}`,
+          limit: 1
         }
       }
     )
@@ -54,7 +62,7 @@ async function consultarAPI(nombre){
 
   } catch (error) {
 
-    if(error.response && error.response.status === 404){
+    if (error.response && error.response.status === 404) {
       return { results: [] }
     }
 
@@ -65,7 +73,7 @@ async function consultarAPI(nombre){
 /* =========================
 BUSCAR MEDICAMENTO EN BD
 ========================= */
-async function buscarMedicamentoBD(nombre){
+async function buscarMedicamentoBD(nombre) {
 
   const value = `%${nombre.toLowerCase()}%`
 
@@ -77,7 +85,7 @@ async function buscarMedicamentoBD(nombre){
     LIMIT 1
   `
 
-  const result = await db.query(query,[value])
+  const result = await db.query(query, [value])
 
   return result.rows[0] || null
 }
@@ -85,46 +93,47 @@ async function buscarMedicamentoBD(nombre){
 /* =========================
 GUARDAR MEDICAMENTO
 ========================= */
-async function guardarMedicamento(result){
+async function guardarMedicamento(result) {
 
-  const generic_en = (result.openfda?.generic_name?.[0] || "").toLowerCase()
-  const generic_es = await traducir(generic_en,"en","es")
+  const generic_en = obtenerCampo(result.openfda?.generic_name).toLowerCase()
 
-  const product_type_en = result.openfda?.product_type?.[0] || ""
-  const product_type_es = await traducir(product_type_en,"en","es")
+  const data = {
+    generic_name_en: generic_en,
+    generic_name_es: await traducirCampo(generic_en, "en", "es"),
 
-  const route_en = result.openfda?.route?.[0] || ""
-  const route_es = await traducir(route_en,"en","es")
+    product_type_en: obtenerCampo(result.openfda?.product_type),
+    route_en: obtenerCampo(result.openfda?.route),
+    pharm_en: obtenerCampo(result.openfda?.pharm_class_epc),
 
-  const pharm_en = result.openfda?.pharm_class_epc?.[0] || ""
-  const pharm_es = await traducir(pharm_en,"en","es")
+    indications_en: obtenerCampo(result.indications_and_usage),
+    dosage_en: obtenerCampo(result.dosage_and_administration),
+    warnings_en: obtenerCampo(result.warnings),
 
-  const indications_en = result.indications_and_usage?.[0] || ""
-  const indications_es = await traducir(indications_en,"en","es")
+    do_not_use_en: obtenerCampo(result.do_not_use),
+    ask_doctor_en: obtenerCampo(result.ask_doctor),
+    stop_use_en: obtenerCampo(result.stop_use),
 
-  const dosage_en = result.dosage_and_administration?.[0] || ""
-  const dosage_es = await traducir(dosage_en,"en","es")
+    keep_en: obtenerCampo(result.keep_out_of_reach_of_children),
+    preg_en: obtenerCampo(result.pregnancy_or_breast_feeding),
+    spl_en: obtenerCampo(result.spl_unclassified_section)
+  }
 
-  const warnings_en = result.warnings?.[0] || ""
-  const warnings_es = await traducir(warnings_en,"en","es")
+  // traducciones
+  data.product_type_es = await traducirCampo(data.product_type_en, "en", "es")
+  data.route_es = await traducirCampo(data.route_en, "en", "es")
+  data.pharm_es = await traducirCampo(data.pharm_en, "en", "es")
 
-  const do_not_use_en = result.do_not_use?.[0] || ""
-  const do_not_use_es = await traducir(do_not_use_en,"en","es")
+  data.indications_es = await traducirCampo(data.indications_en, "en", "es")
+  data.dosage_es = await traducirCampo(data.dosage_en, "en", "es")
+  data.warnings_es = await traducirCampo(data.warnings_en, "en", "es")
 
-  const ask_doctor_en = result.ask_doctor?.[0] || ""
-  const ask_doctor_es = await traducir(ask_doctor_en,"en","es")
+  data.do_not_use_es = await traducirCampo(data.do_not_use_en, "en", "es")
+  data.ask_doctor_es = await traducirCampo(data.ask_doctor_en, "en", "es")
+  data.stop_use_es = await traducirCampo(data.stop_use_en, "en", "es")
 
-  const stop_use_en = result.stop_use?.[0] || ""
-  const stop_use_es = await traducir(stop_use_en,"en","es")
-
-  const keep_en = result.keep_out_of_reach_of_children?.[0] || ""
-  const keep_es = await traducir(keep_en,"en","es")
-
-  const preg_en = result.pregnancy_or_breast_feeding?.[0] || ""
-  const preg_es = await traducir(preg_en,"en","es")
-
-  const spl_en = result.spl_unclassified_section?.[0] || ""
-  const spl_es = await traducir(spl_en,"en","es")
+  data.keep_es = await traducirCampo(data.keep_en, "en", "es")
+  data.preg_es = await traducirCampo(data.preg_en, "en", "es")
+  data.spl_es = await traducirCampo(data.spl_en, "en", "es")
 
   const query = `
   INSERT INTO medicamentos(
@@ -161,45 +170,68 @@ async function guardarMedicamento(result){
     $21,$22,$23,$24,$25,$26
   )
   ON CONFLICT (generic_name_en) DO NOTHING
-  RETURNING *  `
+  RETURNING *`
 
   const values = [
-    generic_en, generic_es,
-    product_type_en, product_type_es,
-    route_en, route_es,
-    pharm_en, pharm_es,
-    indications_en, indications_es,
-    dosage_en, dosage_es,
-    warnings_en, warnings_es,
-    do_not_use_en, do_not_use_es,
-    ask_doctor_en, ask_doctor_es,
-    stop_use_en, stop_use_es,
-    keep_en, keep_es,
-    preg_en, preg_es,
-    spl_en, spl_es
+    data.generic_name_en, data.generic_name_es,
+    data.product_type_en, data.product_type_es,
+    data.route_en, data.route_es,
+    data.pharm_en, data.pharm_es,
+    data.indications_en, data.indications_es,
+    data.dosage_en, data.dosage_es,
+    data.warnings_en, data.warnings_es,
+    data.do_not_use_en, data.do_not_use_es,
+    data.ask_doctor_en, data.ask_doctor_es,
+    data.stop_use_en, data.stop_use_es,
+    data.keep_en, data.keep_es,
+    data.preg_en, data.preg_es,
+    data.spl_en, data.spl_es
   ]
-const { rows } = await db.query(query, values)
 
-// 🔥 CASO 1: SE INSERTÓ
-if(rows.length > 0){
-  return rows[0]
+  const { rows } = await db.query(query, values)
+
+  if (rows.length > 0) return rows[0]
+
+  const existente = await db.query(
+    `SELECT * FROM medicamentos WHERE generic_name_en = $1 LIMIT 1`,
+    [data.generic_name_en]
+  )
+
+  return existente.rows[0]
 }
 
-// 🔥 CASO 2: YA EXISTÍA → HACER SELECT
-const existente = await db.query(
-  `SELECT * FROM medicamentos WHERE generic_name_en = $1 LIMIT 1`,
-  [generic_en]
-)
+/* =========================
+OBTENER MEDICAMENTO (BD + API)
+========================= */
+async function obtenerMedicamento(medicamento, idioma) {
 
-return existente.rows[0]
+  let med = await buscarMedicamentoBD(medicamento)
+
+  if (med) return med
+
+  let nombreEn = medicamento.toLowerCase()
+
+  if (idioma === "es") {
+    const traducido = await traducir(medicamento, "es", "en")
+    if (traducido && traducido !== nombreEn) {
+      nombreEn = traducido
+    }
+  }
+
+  const apiData = await consultarAPI(nombreEn)
+
+  if (!apiData.results || apiData.results.length === 0) {
+    return null
+  }
+
+  return await guardarMedicamento(apiData.results[0])
 }
 
 /* =========================
 TRADUCIR PARA MOSTRAR
 ========================= */
-async function traducirCampos(med, lang){
+async function traducirCampos(med, lang) {
 
-  // 🔥 función para dividir texto en lista limpia
   const dividirTexto = (texto) => {
     if (!texto) return []
 
@@ -213,22 +245,17 @@ async function traducirCampos(med, lang){
       .filter(t => t.length > 15)
   }
 
-  if(lang === "en"){
+  if (lang === "en") {
     return {
       nombre: med.generic_name_en,
-
       general: [
         `Type: ${med.product_type_en || ""}`,
         `Route: ${med.route_en || ""}`,
         `Pharmacological class: ${med.pharm_class_epc_en || ""}`
       ].filter(t => t.trim() !== ""),
-
       indicaciones: dividirTexto(med.indications_and_usage_en),
-
       dosificacion: dividirTexto(med.dosage_and_administration_en),
-
       advertencias: dividirTexto(med.warnings_en),
-
       especial: [
         med.do_not_use_en,
         med.ask_doctor_en,
@@ -236,27 +263,20 @@ async function traducirCampos(med, lang){
         med.keep_out_of_reach_of_children_en,
         med.pregnancy_or_breast_feeding_en,
         med.spl_unclassified_section_en
-      ]
-      .filter(Boolean)
-      .flatMap(dividirTexto)
+      ].filter(Boolean).flatMap(dividirTexto)
     }
   }
 
   return {
     nombre: med.generic_name_es || med.generic_name_en,
-
     general: [
       `Tipo: ${med.product_type_es || ""}`,
       `Vía: ${med.route_es || ""}`,
       `Clase farmacológica: ${med.pharm_class_epc_es || ""}`
     ].filter(t => t.trim() !== ""),
-
     indicaciones: dividirTexto(med.indications_and_usage_es),
-
     dosificacion: dividirTexto(med.dosage_and_administration_es),
-
     advertencias: dividirTexto(med.warnings_es),
-
     especial: [
       med.do_not_use_es,
       med.ask_doctor_es,
@@ -264,12 +284,21 @@ async function traducirCampos(med, lang){
       med.keep_out_of_reach_of_children_es,
       med.pregnancy_or_breast_feeding_es,
       med.spl_unclassified_section_es
-    ]
-    .filter(Boolean)
-    .flatMap(dividirTexto)
+    ].filter(Boolean).flatMap(dividirTexto)
   }
 }
 
+/* =========================
+MANEJO DE CONVERSACIÓN
+========================= */
+async function manejarConversacion({ conversacionId, usuarioId, medicamentoId, titulo }) {
+
+  if (!conversacionId) {
+    return await crearConversacion(usuarioId, medicamentoId, titulo)
+  }
+
+  return { id: conversacionId }
+}
 
 /* =========================
 CONTROLADOR PRINCIPAL
@@ -280,74 +309,38 @@ const consultarMedicamento = async (req, res) => {
     const { medicamento, filtros, conversacionId } = req.body
     const usuarioId = req.usuario.id
 
-    const idiomaMap = {
-      "Español": "es",
-      "English": "en"
-    }
+    const idioma = req.usuario.idioma === "English" ? "en" : "es"
 
-    const idioma = idiomaMap[req.usuario.idioma] || "es"
+    const med = await obtenerMedicamento(medicamento, idioma)
 
-    let med
-
-    // 🔍 buscar en BD
-    med = await buscarMedicamentoBD(medicamento)
-
-    // ❌ si no existe → API
     if (!med) {
-
-      let nombreEn = medicamento.toLowerCase()
-
-      if (idioma === "es") {
-        const traducido = await traducir(medicamento, "es", "en")
-        if (traducido && traducido !== medicamento.toLowerCase()) {
-          nombreEn = traducido
-        }
-      }
-
-      const apiData = await consultarAPI(nombreEn)
-
-      if (!apiData.results || apiData.results.length === 0) {
-        return res.json({ encontrado: false })
-      }
-
-      med = await guardarMedicamento(apiData.results[0])
+      return res.json({ encontrado: false })
     }
 
     const dataTraducida = await traducirCampos(med, idioma)
 
     const contenido = {}
 
-    for (const filtro of filtros) {
-      if (dataTraducida[filtro]) {
-        contenido[filtro] = dataTraducida[filtro]
+    filtros.forEach(f => {
+      if (dataTraducida[f]) {
+        contenido[f] = dataTraducida[f]
       }
-    }
+    })
 
-    const titulo = dataTraducida.nombre
+    const conversacion = await manejarConversacion({
+      conversacionId,
+      usuarioId,
+      medicamentoId: med.id,
+      titulo: dataTraducida.nombre
+    })
 
-    let conversacion
-
-    // 🔥 SI NO EXISTE → CREAR
-    if (!conversacionId) {
-      conversacion = await crearConversacion(usuarioId, med.id, titulo)
-    } else {
-      // 🔥 SI YA EXISTE → USAR LA MISMA
-      conversacion = { id: conversacionId }
-    }
-
-    // ✅ guardar mensajes
-    await guardarMensaje(conversacion.id, titulo, true)
-
-    await guardarMensaje(
-      conversacion.id,
-      JSON.stringify(contenido),
-      false
-    )
+    await guardarMensaje(conversacion.id, dataTraducida.nombre, true)
+    await guardarMensaje(conversacion.id, JSON.stringify(contenido), false)
 
     res.json({
       encontrado: true,
       contenido,
-      conversacionId: conversacion.id // 🔥 devolver ID
+      conversacionId: conversacion.id
     })
 
   } catch (error) {
