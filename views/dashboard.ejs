@@ -59,21 +59,22 @@ Asistente de medicamentos
 
 </header>
 
-<div class="flex flex-1 min-h-0">
+<div class="flex flex-1 overflow-hidden min-h-0">
 <!-- overlay móvil -->
 
 <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-30"></div>
 
 <!-- sidebar -->
 
-<aside id="sidebar"
-class="w-64 bg-white border-r border-[#1a7a5e]/10 p-3 
-transform -translate-x-full sm:translate-x-0 transition
-flex flex-col h-full">
-<div id="sidebar-content" class="flex-1 overflow-y-auto scroll-thin min-h-0">    <h3 id="historialTitulo" class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
-      Historial de búsqueda
-    </h3>
-  </div>
+<aside id="sidebar" class="w-64 bg-white border-r border-[#1a7a5e]/10 p-3 transform -translate-x-full sm:translate-x-0 transition flex flex-col overflow-hidden"
+  style="height: 100%;">
+  <div id="sidebar-content" class="flex-1 overflow-y-auto scroll-thin min-h-0">
+
+<h3 id="historialTitulo" class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
+Historial de búsqueda
+</h3>
+
+</div>
 </aside>
 
 <!-- contenido -->
@@ -81,7 +82,8 @@ flex flex-col h-full">
 <main class="flex-1 flex flex-col chat-bg min-h-0">
 
 <div id="chatContainer"
-class="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4 min-h-0">
+class="flex-1 overflow-y-auto scroll-thin px-6 py-6 flex flex-col gap-4 min-h-0">
+
 
 <div class="text-center py-10 px-4 m-auto max-w-sm">
 

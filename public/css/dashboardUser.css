@@ -85,21 +85,14 @@ BOTÓN NUEVA CONVERSACIÓN
   transform: scale(0.97);
 }
 
-#sidebar {
-  width: 256px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  /* altura = 100% del flex padre, que ya tiene overflow:hidden */
-  align-self: stretch;
+.scroll-thin {
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE y Edge */
 }
 
-#sidebar-content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding-bottom: 8px;
+.scroll-thin::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
 
 /* animación mensajes */
