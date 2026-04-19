@@ -1,189 +1,751 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediConsulta — Asistente de Medicamentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde-oscuro: #0D3D2E;
+      --verde-medio:  #1A5C42;
+      --verde-claro:  #E8F5EE;
+      --verde-muted:  #7A9E8C;
+      --dorado:       #C8973A;
+      --dorado-claro: #F4EDD8;
+      --crema:        #F7F4EF;
+      --texto-oscuro: #1A1A1A;
+      --sidebar-w:    260px;
+    }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<title>MediConsulta — Consultar medicamento</title>
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', sans-serif;
+      background: var(--crema);
+      overflow: hidden;
+    }
 
-<link rel="stylesheet" href="/public/css/dashboardUser.css">
+    /* =====================
+       NAVBAR
+    ===================== */
+    #navbar {
+      position: relative;
+      z-index: 60;
+      height: 58px;
+      background: white;
+      border-bottom: 1px solid rgba(13,61,46,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
+    .nav-left  { display: flex; align-items: center; gap: 10px; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
 
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    .logo-box {
+      width: 36px; height: 36px;
+      background: var(--verde-oscuro);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-box svg { width: 18px; height: 18px; fill: white; }
 
-<script src="https://cdn.tailwindcss.com"></script>
+    .logo-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      color: var(--verde-oscuro);
+      line-height: 1.2;
+    }
+    .logo-text span {
+      font-size: 8px;
+      color: var(--verde-muted);
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
 
+    .btn-login {
+      padding: 6px 16px;
+      border-radius: 18px;
+      border: 1.5px solid var(--verde-oscuro);
+      background: transparent;
+      color: var(--verde-oscuro);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-login:hover { background: var(--verde-claro); }
+
+    .btn-registro {
+      padding: 6px 16px;
+      border-radius: 18px;
+      border: none;
+      background: var(--verde-oscuro);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-registro:hover { background: var(--verde-medio); }
+
+    /* Burger — solo móvil */
+    #sidebar-toggle {
+      display: none;
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: var(--verde-claro);
+      border: none;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* =====================
+       BODY WRAPPER
+       sidebar | right-col
+    ===================== */
+    #body-wrap {
+      display: flex;
+      height: calc(100vh - 58px);
+      overflow: hidden;
+    }
+
+    /* =====================
+       SIDEBAR
+       ocupa hero + panel
+    ===================== */
+    #sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: white;
+      border-right: 1.5px solid rgba(13,61,46,0.10);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+      z-index: 40;
+    }
+
+    #sidebar-inner {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    #sidebar-inner::-webkit-scrollbar { width: 3px; }
+    #sidebar-inner::-webkit-scrollbar-thumb { background: #c8e6d4; border-radius: 3px; }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--verde-muted);
+      padding: 2px 6px 8px;
+    }
+
+    #nuevaConversacionBtn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 11px;
+      background: var(--verde-oscuro);
+      color: white;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      margin-bottom: 10px;
+      transition: background 0.2s;
+    }
+    #nuevaConversacionBtn:hover { background: var(--verde-medio); }
+
+    .historial-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 10px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .historial-item:hover  { background: var(--crema); }
+    .historial-item.activo { background: var(--verde-claro); }
+
+    .historial-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .historial-info { flex: 1; min-width: 0; }
+
+    .historial-titulo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--texto-oscuro);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .historial-meta {
+      font-size: 11px;
+      color: #9CA3A0;
+      margin-top: 1px;
+    }
+
+    /* =====================
+       COLUMNA DERECHA
+       hero arriba + panel abajo
+    ===================== */
+    #right-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* =====================
+       HERO — compacto
+    ===================== */
+    #hero {
+      background: linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde-medio) 100%);
+      padding: 18px 32px 16px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-deco {
+      position: absolute;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    #hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: white;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    #hero > p {
+      font-size: 13px;
+      color: #A8D4BC;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    /* Buscador */
+    #search-wrap {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 28px;
+      padding: 7px 7px 7px 18px;
+      max-width: 640px;
+      margin: 0 auto 12px;
+      box-shadow: 0 6px 20px rgba(13,61,46,0.22);
+      gap: 8px;
+    }
+    #search-wrap svg { flex-shrink: 0; }
+
+    #medicamentoInput {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-family: 'Nunito', sans-serif;
+      color: var(--texto-oscuro);
+      background: transparent;
+      min-width: 0;
+    }
+    #medicamentoInput::placeholder { color: #9CA3A0; }
+
+    #enviarBtn {
+      padding: 9px 22px;
+      background: var(--dorado);
+      color: white;
+      border: none;
+      border-radius: 22px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    #enviarBtn:hover { background: #b07e2a; }
+
+    /* Pills categoría */
+    .hero-label {
+      font-size: 10px;
+      color: #A8D4BC;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    #hero-pills {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .hero-pill {
+      padding: 6px 15px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .hero-pill:hover { background: rgba(255,255,255,0.22); }
+    .hero-pill.activo {
+      background: rgba(255,255,255,0.26);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.5);
+    }
+    .hero-pill.especial { background: rgba(200,151,58,0.85); }
+    .hero-pill.especial:hover { background: rgba(200,151,58,1); }
+    .hero-pill.especial.activo {
+      background: var(--dorado);
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.4);
+    }
+
+    /* =====================
+       INFO PANEL
+    ===================== */
+    #infoPanel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    #infoPanel::-webkit-scrollbar { width: 5px; }
+    #infoPanel::-webkit-scrollbar-thumb { background: #c8e6d4; border-radius: 4px; }
+
+    /* Tarjeta medicamento */
+    #medCard {
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 3px 16px rgba(0,0,0,0.07);
+      animation: fadeUp 0.28s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      background: var(--verde-oscuro);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .card-header-info h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: white;
+      margin-bottom: 3px;
+    }
+    .card-header-info p { font-size: 12px; color: #A8D4BC; }
+
+    .card-badge {
+      padding: 8px 20px;
+      background: var(--dorado);
+      color: white;
+      border-radius: 24px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 420px;
+      line-height: 1.4;
+      letter-spacing: 0.3px;
+      flex-shrink: 1;
+    }
+
+    .card-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .seccion-titulo {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--verde-oscuro);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .seccion-titulo::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--verde-claro);
+    }
+
+    .general-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .general-chip {
+      background: var(--crema);
+      border-radius: 9px;
+      padding: 7px 12px;
+    }
+    .chip-label { font-size: 10px; color: var(--verde-muted); margin-bottom: 2px; }
+    .chip-valor { font-size: 13px; font-weight: 700; color: var(--texto-oscuro); }
+
+    .bloque {
+      border-radius: 9px;
+      padding: 12px 14px 12px 18px;
+      position: relative;
+      margin-bottom: 7px;
+    }
+    .bloque::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 9px 0 0 9px;
+    }
+    .bloque-verde        { background: #E8F5EE; }
+    .bloque-verde::before { background: var(--verde-oscuro); }
+    .bloque-verde .bloque-texto { color: #1A5C42; }
+
+    .bloque-amber        { background: #FDF0E0; }
+    .bloque-amber::before { background: var(--dorado); }
+    .bloque-amber .bloque-texto { color: #9C7320; }
+
+    .bloque-rojo         { background: #FDEAEA; }
+    .bloque-rojo::before  { background: #A32D2D; }
+    .bloque-rojo .bloque-texto { color: #A32D2D; }
+
+    .bloque-texto { font-size: 13px; line-height: 1.6; }
+
+    .fila-doble {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .item-lista { font-size: 13px; color: #3a3a3a; line-height: 1.7; padding-left: 0; }
+    .item-lista li {
+      list-style: none;
+      padding: 4px 0 4px 14px;
+      position: relative;
+      border-bottom: 1px solid rgba(13,61,46,0.06);
+    }
+    .item-lista li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--verde-muted);
+    }
+
+    .nota-pie {
+      background: var(--verde-claro);
+      border-radius: 8px;
+      padding: 9px 14px;
+      font-size: 11px;
+      color: var(--verde-medio);
+      text-align: center;
+    }
+
+    .spinner {
+      width: 22px; height: 22px;
+      border: 3px solid var(--verde-claro);
+      border-top-color: var(--verde-oscuro);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Sidebar mobile header con botón cerrar */
+    .sidebar-mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(13,61,46,0.08);
+      flex-shrink: 0;
+    }
+    .sidebar-mobile-header span {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--verde-oscuro);
+    }
+    .sidebar-close-btn {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: var(--crema);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* =====================
+       OVERLAY MÓVIL
+    ===================== */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 39;
+    }
+    #sidebar-overlay.open { display: block; }
+
+    /* =====================
+       RESPONSIVE — tablet
+    ===================== */
+    @media (max-width: 900px) {
+      :root { --sidebar-w: 220px; }
+      #hero h1 { font-size: 22px; }
+      #hero { padding: 16px 20px 14px; }
+      #search-wrap { max-width: 100%; }
+    }
+
+    /* =====================
+       RESPONSIVE — móvil
+    ===================== */
+    @media (max-width: 640px) {
+      /* Burger visible, ocultar subtítulo */
+      #sidebar-toggle { display: flex; }
+      .logo-text span { display: none; }
+      .logo-text h2   { font-size: 13px; }
+
+      /* Navbar compacto */
+      #navbar    { padding: 0 8px; }
+      .nav-left  { gap: 6px; }
+      .nav-right { gap: 4px; }
+
+      /* Botones auth pequeños */
+      .btn-login    { padding: 4px 8px; font-size: 11px; border-width: 1px; }
+      .btn-registro { padding: 4px 8px; font-size: 11px; }
+
+      /* Sidebar drawer */
+      #sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        z-index: 50;
+        transform: translateX(-100%);
+        width: 82vw;
+        max-width: 300px;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+      }
+      #sidebar.open { transform: translateX(0); }
+
+      /* Header del sidebar en móvil */
+      .sidebar-mobile-header { display: flex; }
+
+      /* Inner sin padding-top extra (el header lo maneja) */
+      #sidebar-inner { padding-top: 10px; }
+
+      /* Botón nueva consulta siempre visible */
+      #nuevaConversacionBtn { display: flex !important; }
+
+      /* Hero */
+      #hero { padding: 14px 16px 12px; }
+      #hero h1 { font-size: 20px; }
+      #hero > p { display: none; }
+      #search-wrap { padding: 6px 6px 6px 14px; margin-bottom: 10px; }
+      #medicamentoInput { font-size: 13px; }
+      #enviarBtn { padding: 8px 16px; font-size: 12px; }
+      .hero-label { font-size: 9px; margin-bottom: 6px; }
+      .hero-pill  { padding: 5px 11px; font-size: 11px; }
+
+      /* Card info */
+      #infoPanel { padding: 12px; }
+      .card-header {
+        padding: 14px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .card-header-info h2 { font-size: 17px; }
+      .card-badge {
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+        text-align: center;
+        text-overflow: unset;
+        overflow: visible;
+      }
+      .card-body  { padding: 14px 16px; gap: 14px; }
+      .fila-doble { grid-template-columns: 1fr; }
+      .general-grid { flex-direction: column; }
+    }
+
+    /* =====================
+       RESPONSIVE — muy pequeño
+    ===================== */
+    @media (max-width: 380px) {
+      #hero h1 { font-size: 17px; }
+      #hero-pills { gap: 4px; }
+      .hero-pill { padding: 4px 9px; font-size: 10px; }
+      .btn-login { display: none; }
+      .btn-registro { padding: 5px 11px; font-size: 11px; }
+      .card-header-info h2 { font-size: 15px; }
+      .bloque-texto { font-size: 12px; }
+    }
+  </style>
 </head>
-
-<body class="flex flex-col h-screen font-['Nunito',sans-serif]">
-
-<header class="relative z-20 flex items-center justify-between px-4 sm:px-6 py-3
-bg-white/92 backdrop-blur border-b border-[#1a7a5e]/10
-shadow-[0_2px_16px_rgba(26,122,94,0.08)]">
-
-<div class="flex items-center gap-3">
-
-<button id="sidebar-toggle"
-class="sm:hidden w-9 h-9 rounded-xl bg-[#e8f5f0] flex items-center justify-center">
-
-<svg class="w-5 h-5 fill-[#1a7a5e]" viewBox="0 0 24 24">
-<path d="M3 6h18M3 12h18M3 18h18" stroke="#1a7a5e" stroke-width="2" stroke-linecap="round" fill="none"/>
-</svg>
-
-</button>
-
-<div class="w-10 h-10 bg-gradient-to-br from-[#1a7a5e] to-[#25a87e]
-rounded-xl flex items-center justify-center">
-
-<svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
-<path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
-</svg>
-
-</div>
-
-<div>
-
-<h2 class="font-['Playfair_Display',serif] text-lg text-[#135c47]">
-MediConsulta
-</h2>
-
-<span id="subtituloHeader" class="text-[10px] text-[#5a7a6e] font-bold uppercase">
-Asistente de medicamentos
-</span>
-
-</div>
-
-</div>
-
-</header>
-
-<div class="flex flex-1 overflow-hidden min-h-0">
-<!-- overlay móvil -->
-
-<div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-30"></div>
-
-<!-- sidebar -->
-
-<aside id="sidebar" class="w-64 bg-white border-r border-[#1a7a5e]/10 p-3 transform -translate-x-full sm:translate-x-0 transition flex flex-col overflow-hidden"
-  style="height: 100%;">
-  <div id="sidebar-content" class="flex-1 overflow-y-auto scroll-thin min-h-0">
-
-<h3 id="historialTitulo" class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
-Historial de búsqueda
-</h3>
-
-</div>
-</aside>
-
-<!-- contenido -->
-
-<main class="flex-1 flex flex-col chat-bg min-h-0">
-
-<div id="chatContainer"
-class="flex-1 overflow-y-auto scroll-thin px-6 py-6 flex flex-col gap-4 min-h-0">
-
-
-<div class="text-center py-10 px-4 m-auto max-w-sm">
-
-<h2 id="tituloInicio"
-class="font-['Playfair_Display',serif] text-2xl text-[#135c47] mb-2">
-
-Selecciona primero una categoría
-
-</h2>
-
-<p id="subtituloInicio" class="text-sm text-[#5a7a6e]">
-
-Luego escribe el medicamento
-
-</p>
-
-</div>
-
-<div class="bg-white rounded-2xl p-5 shadow-lg max-w-md">
-
-<h3 class="font-extrabold text-[#135c47] text-base">
-</h3>
-
-<div class="grid grid-cols-2 gap-2 mt-3">
-
-<button onclick="seleccionarFiltro('general',this)" class="filtro-btn">
-📋 <span id="filtroGeneral">Info general</span>
-</button>
-
-<button onclick="seleccionarFiltro('indicaciones',this)" class="filtro-btn">
-🩺 <span id="filtroIndicaciones">Indicaciones</span>
-</button>
-
-<button onclick="seleccionarFiltro('dosificacion',this)" class="filtro-btn">
-💉 <span id="filtroDosificacion">Dosificación</span>
-</button>
-
-<button onclick="seleccionarFiltro('advertencias',this)" class="filtro-btn">
-⚠️ <span id="filtroAdvertencias">Advertencias</span>
-</button>
-
-</div>
-
-<button onclick="seleccionarFiltro('especial',this)"
-class="filtro-btn w-full mt-2">
-
-✨ <span id="filtroEspecial">Información especial</span>
-
-</button>
-
-</div>
-
-</div>
-
-<div id="inputContainer"
-class="px-6 py-4 bg-white border-t flex gap-3">
-
-<input
-type="text"
-id="medicamentoInput"
-placeholder="Escribe un medicamento..."
-class="flex-1 border rounded-xl px-4 py-2">
-
-<button id="enviarBtn"
-class="px-4 py-2 bg-[#1a7a5e] text-white rounded-xl">
-
-Enviar
-
-</button>
-
-</div>
-
-</main>
-
-</div>
-
-<script>
-
-const idiomaUsuario = "<%= usuario.idioma %>";
-
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('sidebar-overlay');
-
-document.getElementById('sidebar-toggle').addEventListener('click', () => {
-
-sidebar.classList.toggle('open');
-overlay.classList.toggle('open');
-
-});
-
-overlay.addEventListener('click', () => {
-
-sidebar.classList.remove('open');
-overlay.classList.remove('open');
-
-});
-
-</script>
-
-<script src="/public/js/dashboardUser.js"></script>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav id="navbar">
+    <div class="nav-left">
+      <button id="sidebar-toggle" aria-label="Abrir menú">
+        <svg viewBox="0 0 24 24" width="18" height="18">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="#0D3D2E" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+      </button>
+
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24">
+          <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
+        </svg>
+      </div>
+
+      <div class="logo-text">
+        <h2>MediConsulta</h2>
+        <span id="subtituloHeader">Asistente de medicamentos</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <button class="btn-login"    id="btnLogin">Iniciar sesión</button>
+      <button class="btn-registro" id="btnRegistro">Registrarse</button>
+    </div>
+  </nav>
+
+  <!-- ===== BODY PRINCIPAL ===== -->
+  <div id="body-wrap">
+
+    <!-- Overlay para móvil -->
+    <div id="sidebar-overlay"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar">
+      <!-- Header visible solo en móvil con btn cerrar -->
+      <div class="sidebar-mobile-header">
+        <span>MediConsulta</span>
+        <button class="sidebar-close-btn" id="sidebar-close" aria-label="Cerrar menú">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0D3D2E" stroke-width="2.5" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div id="sidebar-inner">
+        <!-- Inyectado por JS -->
+      </div>
+    </aside>
+
+    <!-- ===== COLUMNA DERECHA ===== -->
+    <div id="right-col">
+
+      <!-- Hero con buscador y filtros -->
+      <section id="hero">
+        <div class="hero-deco" style="width:70px;height:70px;top:-18px;left:40px;transform:rotate(-30deg);border-radius:40% 60%;"></div>
+        <div class="hero-deco" style="width:55px;height:22px;bottom:14px;left:160px;transform:rotate(20deg);"></div>
+        <div class="hero-deco" style="width:80px;height:32px;top:16px;right:80px;transform:rotate(-15deg);"></div>
+        <div class="hero-deco" style="width:45px;height:18px;bottom:20px;right:160px;transform:rotate(35deg);"></div>
+
+        <h1 id="heroTitulo">Consulta cualquier medicamento</h1>
+        <p id="heroSubtitulo">Información confiable al instante — dosificación, efectos e indicaciones</p>
+
+        <div id="search-wrap">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A9E8C" stroke-width="2" stroke-linecap="round" flex-shrink="0">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="medicamentoInput" placeholder="Busca un medicamento, principio activo o marca..." autocomplete="off">
+          <button id="enviarBtn">Buscar</button>
+        </div>
+
+        <div class="hero-label" id="heroLabel">Selecciona una categoría</div>
+        <div id="hero-pills">
+          <button class="hero-pill"          onclick="toggleHeroPill('general',      this)" id="heroPill-general">      📋 <span>Info general</span></button>
+          <button class="hero-pill"          onclick="toggleHeroPill('indicaciones', this)" id="heroPill-indicaciones"> 🩺 <span>Indicaciones</span></button>
+          <button class="hero-pill"          onclick="toggleHeroPill('dosificacion', this)" id="heroPill-dosificacion"> 💉 <span>Dosificación</span></button>
+          <button class="hero-pill"          onclick="toggleHeroPill('advertencias', this)" id="heroPill-advertencias"> ⚠️ <span>Advertencias</span></button>
+          <button class="hero-pill especial" onclick="toggleHeroPill('especial',     this)" id="heroPill-especial">     ✨ <span>Info especial</span></button>
+        </div>
+      </section>
+
+      <!-- Panel de información del medicamento -->
+      <div id="infoPanel">
+        <!-- Inyectado por JS -->
+      </div>
+
+    </div><!-- /right-col -->
+  </div><!-- /body-wrap -->
+
+  <script>
+    const idiomaUsuario = "<%= usuario.idioma %>";
+  </script>
+  <script src="/public/js/dashboardUser.js"></script>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    }
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('open');
+    }
+
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+
+    document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+  </script>
 
 </body>
 </html>

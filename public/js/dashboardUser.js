@@ -1,421 +1,526 @@
-const input = document.getElementById("medicamentoInput")
-const boton = document.getElementById("enviarBtn")
-const chat = document.getElementById("chatContainer")
-const inputContainer = document.getElementById("inputContainer")
-const mensajeInicio = document.getElementById("mensajeInicio")
+/* =========================
+  CONFIG
+========================= */
+const idioma = (typeof idiomaUsuario !== 'undefined' && idiomaUsuario === "English") ? "en" : "es"
 
-let conversacionId = null
+const input        = document.getElementById("medicamentoInput")
+const boton        = document.getElementById("enviarBtn")
+const infoPanel    = document.getElementById("infoPanel")
+const sidebarInner = document.getElementById("sidebar-inner")
+
+let conversacionId       = null
 let filtrosSeleccionados = []
-let estadoInicialHTML = ""
-// idioma desde JWT (inyectado en EJS)
-const idioma = idiomaUsuario === "English" ? "en" : "es"
+let nombreMedActivo      = ""
 
 /* =========================
-TRADUCCIONES
+  TRADUCCIONES
 ========================= */
 const traducciones = {
-  es:{
-    tituloInicio:"Selecciona primero una categoría",
-    subtituloInicio:"Luego escribe el medicamento",
-    general:"Info general",
-    indicaciones:"Indicaciones",
-    dosificacion:"Dosificación",
-    advertencias:"Advertencias",
-    especial:"Información especial",
-    placeholder:"Escribe un medicamento...",
-    consultando:"Consultando...",
-    error:"Error consultando medicamento",
-    seleccionaFiltro:"Selecciona al menos un filtro",
-    noEncontrado:"Medicamento no encontrado",
-    historial:"Historial de búsqueda",
-    asistente:"Asistente de medicamentos",
-    enviar:"Enviar",
-    nuevaConversacion:"➕ Nueva conversación"
+  es: {
+    tituloInicio:    "Selecciona una categoría y busca",
+    subtituloInicio: "La información aparecerá aquí",
+    general:         "Info general",
+    indicaciones:    "Indicaciones",
+    dosificacion:    "Dosificación",
+    advertencias:    "Advertencias",
+    especial:        "Info especial",
+    placeholder:     "Busca un medicamento",
+    buscando:        "Consultando...",
+    error:           "Error al consultar el medicamento. Intenta de nuevo.",
+    sinFiltro:       "Selecciona al menos una categoría antes de buscar.",
+    noEncontrado:    "Medicamento no encontrado",
+    noEncontradoSub: "Verifica el nombre e intenta de nuevo.",
+    historial:       "Historial reciente",
+    asistente:       "Asistente de medicamentos",
+    enviar:          "Buscar",
+    nueva:           "Nueva consulta",
+    notaPie:         "Esta información es educativa. Consulte siempre a su médico o farmacéutico.",
+    selCategoria:    "Selecciona una categoría",
+    heroTitulo:      "Consulta cualquier medicamento",
+    heroSub:         "Información confiable al instante — dosificación, efectos e indicaciones"
   },
-  en:{
-    tituloInicio:"Select a category first",
-    subtituloInicio:"Then type the medicine",
-    general:"General info",
-    indicaciones:"Indications",
-    dosificacion:"Dosage",
-    advertencias:"Warnings",
-    especial:"Special information",
-    placeholder:"Type a medicine...",
-    consultando:"Consulting...",
-    error:"Error consulting medicine",
-    seleccionaFiltro:"Select at least one filter",
-    noEncontrado:"Medicine not found",
-    historial:"Search history",
-    asistente:"Medicine assistant",
-    enviar:"Send",
-    nuevaConversacion:"➕ New conversation"
+  en: {
+    tituloInicio:    "Select a category and search",
+    subtituloInicio: "The information will appear here",
+    general:         "General info",
+    indicaciones:    "Indications",
+    dosificacion:    "Dosage",
+    advertencias:    "Warnings",
+    especial:        "Special info",
+    placeholder:     "Search for a medicine",
+    buscando:        "Consulting...",
+    error:           "Error consulting medicine. Please try again.",
+    sinFiltro:       "Select at least one category before searching.",
+    noEncontrado:    "Medicine not found",
+    noEncontradoSub: "Check the name and try again.",
+    historial:       "Recent history",
+    asistente:       "Medicine assistant",
+    enviar:          "Search",
+    nueva:           "New search",
+    notaPie:         "This information is educational. Always consult your doctor or pharmacist.",
+    selCategoria:    "Select a category",
+    heroTitulo:      "Look up any medication",
+    heroSub:         "Reliable information instantly — dosage, effects and indications"
   }
 }
-
-/* =========================
-UTILS UI
-========================= */
 
 const t = () => traducciones[idioma]
 
-function scrollChat(){
-  chat.scrollTop = chat.scrollHeight
-}
+/* =========================
+  APLICAR IDIOMA
+========================= */
+function aplicarIdioma() {
+  const tx = t()
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val }
 
-function ocultarMensajeInicio(){
-  if(mensajeInicio) mensajeInicio.style.display = "none"
+  set("subtituloHeader", tx.asistente)
+  set("heroLabel",       tx.selCategoria)
+
+  if (input) input.placeholder = tx.placeholder
+  if (boton) boton.textContent  = tx.enviar
+
+  const heroMap = {
+    "heroPill-general":      tx.general,
+    "heroPill-indicaciones": tx.indicaciones,
+    "heroPill-dosificacion": tx.dosificacion,
+    "heroPill-advertencias": tx.advertencias,
+    "heroPill-especial":     tx.especial
+  }
+  Object.entries(heroMap).forEach(([id, val]) => {
+    const el = document.getElementById(id)
+    if (el) { const span = el.querySelector("span"); if (span) span.textContent = val }
+  })
 }
 
 /* =========================
-IDIOMA UI
+  FILTROS
 ========================= */
-function aplicarIdioma(){
-
-  const txt = t()
-
-  document.getElementById("tituloInicio").innerText = txt.tituloInicio
-  document.getElementById("subtituloInicio").innerText = txt.subtituloInicio
-
-  document.getElementById("filtroGeneral").innerText = txt.general
-  document.getElementById("filtroIndicaciones").innerText = txt.indicaciones
-  document.getElementById("filtroDosificacion").innerText = txt.dosificacion
-  document.getElementById("filtroAdvertencias").innerText = txt.advertencias
-  document.getElementById("filtroEspecial").innerText = txt.especial
-
-  document.getElementById("historialTitulo").textContent = txt.historial
-  document.getElementById("subtituloHeader").textContent = txt.asistente
-  boton.textContent = txt.enviar
-  input.placeholder = txt.placeholder
-}
-
-/* =========================
-FILTROS
-========================= */
-function toggleFiltro(filtro, boton){
-
-  if(filtrosSeleccionados.includes(filtro)){
+function toggleHeroPill(filtro, btn) {
+  if (filtrosSeleccionados.includes(filtro)) {
     filtrosSeleccionados = filtrosSeleccionados.filter(f => f !== filtro)
-    boton.classList.remove("filtro-activo")
-  }else{
+    btn?.classList.remove("activo")
+  } else {
     filtrosSeleccionados.push(filtro)
-    boton.classList.add("filtro-activo")
-  }
-
-  inputContainer.style.display =
-    filtrosSeleccionados.length > 0 ? "flex" : "none"
-}
-
-function seleccionarFiltro(filtro, boton){
-  toggleFiltro(filtro, boton)
-}
-
-/* =========================
-MENSAJES
-========================= */
-
-function crearMensajeWrapper(esUsuario){
-  const div = document.createElement("div")
-  div.className = esUsuario
-    ? "flex justify-end animate-fadeIn"
-    : "flex animate-fadeIn"
-  return div
-}
-
-function agregarMensajeUsuario(texto){
-
-  ocultarMensajeInicio()
-
-  const div = crearMensajeWrapper(true)
-
-  div.innerHTML = `
-  <div class="bg-[#e8f5f0] border border-[#1a7a5e]/20 px-4 py-3 rounded-2xl max-w-sm shadow">
-    ${texto}
-  </div>
-  `
-
-  chat.appendChild(div)
-  scrollChat()
-}
-
-function agregarMensajeBot(html){
-
-  ocultarMensajeInicio()
-
-  const div = crearMensajeWrapper(false)
-
-  div.innerHTML = `
-  <div class="bg-white border border-gray-200 px-4 py-3 rounded-2xl max-w-md shadow-sm">
-    ${html}
-  </div>
-  `
-
-  chat.appendChild(div)
-  scrollChat()
-}
-
-function eliminarUltimoMensaje(){
-  if(chat.lastChild){
-    chat.removeChild(chat.lastChild)
+    btn?.classList.add("activo")
   }
 }
 
 /* =========================
-FORMATEAR RESPUESTA
+  RENDER: ESTADO VACÍO
 ========================= */
-
-function generarHTMLDesdeJSON(data){
-
-  let html = ""
-
-  for(const key in data){
-
-    const lista = data[key]
-
-    if(!Array.isArray(lista) || lista.length === 0) continue
-
-    html += `
-    <div style="margin-bottom:20px">
-      <div style="font-weight:700;color:#135c47;margin-bottom:4px">
-        ${key.toUpperCase()}
-      </div>
-      <div style="font-size:14px;line-height:1.5">
-        ${lista.map(item => `<div>• ${item}</div>`).join("")}
+function mostrarEstadoVacio() {
+  infoPanel.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#7A9E8C;text-align:center;">
+      <div>
+        <div style="font-size:48px;margin-bottom:12px;">💊</div>
+        <strong style="display:block;font-family:'Playfair Display',serif;font-size:20px;color:#0D3D2E;margin-bottom:6px;">
+          ${t().tituloInicio}
+        </strong>
+        <span style="font-size:14px;color:#7A9E8C;">${t().subtituloInicio}</span>
       </div>
     </div>
+  `
+}
+
+/* =========================
+  RENDER: LOADING
+========================= */
+function mostrarLoading() {
+  infoPanel.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;height:200px;gap:12px;">
+      <div class="spinner"></div>
+      <span style="font-size:14px;color:#7A9E8C;">${t().buscando}</span>
+    </div>
+  `
+}
+
+/* =========================
+  RENDER: MENSAJE
+========================= */
+function mostrarMensaje(titulo, subtitulo = "", tipo = "info") {
+  const color = tipo === "error" ? "#A32D2D" : "#0D3D2E"
+  const icono = tipo === "error" ? "❌" : "🔍"
+  infoPanel.innerHTML = `
+    <div style="text-align:center;padding:48px 24px;color:#7A9E8C;">
+      <div style="font-size:40px;margin-bottom:12px;">${icono}</div>
+      <strong style="display:block;font-size:16px;font-weight:800;color:${color};margin-bottom:6px;">${titulo}</strong>
+      ${subtitulo ? `<p style="font-size:14px;margin-top:4px;">${subtitulo}</p>` : ""}
+    </div>
+  `
+}
+
+/* =========================
+  RENDER: CARD MEDICAMENTO
+========================= */
+function renderizarMedicamento(nombre, contenido) {
+
+  // Badge: filtros que tienen datos reales
+  const filtrosConData = filtrosSeleccionados.filter(f => contenido[f]?.length > 0)
+  const badge = (filtrosConData.length ? filtrosConData : filtrosSeleccionados)
+    .map(f => t()[f] || f).join(" · ")
+
+  // Extraer clase farmacológica para subtítulo del header
+  let claseText = ""
+  if (contenido.general?.length) {
+    const claseItem = contenido.general.find(g =>
+      g.toLowerCase().startsWith("clase") ||
+      g.toLowerCase().startsWith("class") ||
+      g.toLowerCase().startsWith("pharmacol")
+    )
+    if (claseItem) {
+      claseText = claseItem.split(":").slice(1).join(":").trim()
+    }
+  }
+
+  // ── GENERAL ──
+  let htmlGeneral = ""
+  if (contenido.general?.length) {
+    const chips = contenido.general.map(item => {
+      const colonIdx = item.indexOf(":")
+      const label = colonIdx > -1 ? item.slice(0, colonIdx).trim() : ""
+      const valor = colonIdx > -1 ? item.slice(colonIdx + 1).trim() : item
+      return `
+        <div class="general-chip">
+          <div class="chip-label">${label}</div>
+          <div class="chip-valor">${valor || "—"}</div>
+        </div>
+      `
+    }).join("")
+    htmlGeneral = `
+      <div>
+        <div class="seccion-titulo">${t().general}</div>
+        <div class="general-grid">${chips}</div>
+      </div>
     `
   }
 
-  return html
+  // ── INDICACIONES ──
+  let htmlIndicaciones = ""
+  if (contenido.indicaciones?.length) {
+    htmlIndicaciones = renderLista(t().indicaciones, contenido.indicaciones)
+  }
+
+  // ── DOSIFICACIÓN ──
+  let htmlDosificacion = ""
+  if (contenido.dosificacion?.length) {
+    const clases = ["bloque-verde", "bloque-amber", "bloque-rojo"]
+    const bloques = contenido.dosificacion.map((item, i) =>
+      `<div class="bloque ${clases[Math.min(i, clases.length - 1)]}"><p class="bloque-texto">${item}</p></div>`
+    ).join("")
+    htmlDosificacion = `
+      <div>
+        <div class="seccion-titulo">${t().dosificacion}</div>
+        ${bloques}
+      </div>
+    `
+  }
+
+  // ── ADVERTENCIAS ──
+  let htmlAdvertencias = ""
+  if (contenido.advertencias?.length) {
+    const items = contenido.advertencias
+    if (items.length >= 2) {
+      const mitad = Math.ceil(items.length / 2)
+      htmlAdvertencias = `
+        <div>
+          <div class="seccion-titulo">${t().advertencias}</div>
+          <div class="fila-doble">
+            <div>${items.slice(0, mitad).map(item => `<div class="bloque bloque-rojo"><p class="bloque-texto">${item}</p></div>`).join("")}</div>
+            <div>${items.slice(mitad).map(item => `<div class="bloque bloque-amber"><p class="bloque-texto">${item}</p></div>`).join("")}</div>
+          </div>
+        </div>
+      `
+    } else {
+      htmlAdvertencias = renderBloques(t().advertencias, items, "bloque-rojo")
+    }
+  }
+
+  // ── ESPECIAL ──
+  let htmlEspecial = ""
+  if (contenido.especial?.length) {
+    htmlEspecial = renderLista(t().especial, contenido.especial)
+  }
+
+  const cuerpo = [htmlGeneral, htmlIndicaciones, htmlDosificacion, htmlAdvertencias, htmlEspecial]
+    .filter(Boolean).join("")
+
+  infoPanel.innerHTML = `
+    <div id="medCard">
+      <div class="card-header">
+        <div class="card-header-info">
+          <h2>${capitalize(nombre)}</h2>
+          ${claseText ? `<p>${claseText}</p>` : ""}
+        </div>
+        <div class="card-badge">${badge}</div>
+      </div>
+      <div class="card-body">
+        ${cuerpo || `<p style="color:#7A9E8C;font-size:14px;">Sin información disponible para los filtros seleccionados.</p>`}
+        <div class="nota-pie">${t().notaPie}</div>
+      </div>
+    </div>
+  `
+}
+
+function renderLista(titulo, items) {
+  return `
+    <div>
+      <div class="seccion-titulo">${titulo}</div>
+      <ul class="item-lista">
+        ${items.map(item => `<li>${item}</li>`).join("")}
+      </ul>
+    </div>
+  `
+}
+
+function renderBloques(titulo, items, clase = "bloque-verde") {
+  return `
+    <div>
+      <div class="seccion-titulo">${titulo}</div>
+      ${items.map(item => `<div class="bloque ${clase}"><p class="bloque-texto">${item}</p></div>`).join("")}
+    </div>
+  `
+}
+
+function capitalize(str) {
+  if (!str) return ""
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
 /* =========================
-API
+  API FETCH
 ========================= */
-
-async function fetchConsulta(payload){
-  const res = await fetch("/consultar",{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
+async function fetchConsulta(payload) {
+  const res = await fetch("/consultar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error(errBody.error || `HTTP ${res.status}`)
+  }
 
   return await res.json()
 }
 
 /* =========================
-CONSULTA PRINCIPAL
+  CONSULTA PRINCIPAL
 ========================= */
-
-async function enviarConsulta(){
-
+async function enviarConsulta() {
   const medicamento = input.value.trim()
+  if (!medicamento) return
 
-  if(!medicamento) return
-
-  if(filtrosSeleccionados.length === 0){
-    return agregarMensajeBot(t().seleccionaFiltro)
+  if (filtrosSeleccionados.length === 0) {
+    mostrarMensaje(t().sinFiltro, "", "info")
+    return
   }
 
-  agregarMensajeUsuario(medicamento)
-  input.value = ""
-  agregarMensajeBot(t().consultando)
+  mostrarLoading()
 
-  try{
-
+  try {
     const data = await fetchConsulta({
       medicamento,
       filtros: filtrosSeleccionados,
       conversacionId
     })
 
-    if(data.conversacionId){
+    if (data.conversacionId) {
       conversacionId = data.conversacionId
     }
 
-    eliminarUltimoMensaje()
-
-    if(!data.encontrado){
-      return agregarMensajeBot(t().noEncontrado)
+    if (!data.encontrado) {
+      mostrarMensaje(t().noEncontrado, t().noEncontradoSub, "info")
+      return
     }
 
-    const html = generarHTMLDesdeJSON(data.contenido)
-    agregarMensajeBot(html)
+    // ✅ Usar nombre del backend (ya traducido correctamente)
+    nombreMedActivo = data.nombre || medicamento
+    renderizarMedicamento(nombreMedActivo, data.contenido)
 
-  } catch (error){
+    // Refrescar historial (sin await para no bloquear UI)
+    cargarHistorial()
 
-    eliminarUltimoMensaje()
-    agregarMensajeBot(t().error)
-
+  } catch (err) {
+    console.error("Error en consulta:", err)
+    mostrarMensaje(t().error, "", "error")
   }
 }
 
 /* =========================
-HISTORIAL
+  HISTORIAL
 ========================= */
+async function cargarHistorial() {
+  try {
+    const res = await fetch("/api/historial")
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
-async function cargarHistorial(){
+    const data = await res.json()
 
-  const res = await fetch('/api/historial')
-  const data = await res.json()
+    sidebarInner.innerHTML = ""
 
-  // 🔥 usar el contenedor interno
-  const sidebarContent = document.getElementById('sidebar-content')
+    // Botón nueva consulta
+    const btnNueva = document.createElement("button")
+    btnNueva.id = "nuevaConversacionBtn"
+    btnNueva.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      ${t().nueva}
+    `
+    btnNueva.addEventListener("click", nuevaConsulta)
+    sidebarInner.appendChild(btnNueva)
 
-  // 🔥 pintar header + botón
- sidebarContent.innerHTML = `
-  <div class="sticky top-0 bg-white pb-2 z-10">
+    // Label
+    const label = document.createElement("div")
+    label.className = "sidebar-label"
+    label.textContent = t().historial
+    sidebarInner.appendChild(label)
 
-    <button id="nuevaConversacionBtn"
-    class="nueva-conv-btn mb-3">
-      ${t().nuevaConversacion}
-    </button>
-
-    <h3 class="text-[10px] font-bold uppercase text-[#5a7a6e] px-2 pt-1 pb-3">
-      ${t().historial}
-    </h3>
-
-  </div>
-`
-
-  // 🔥 evento botón
-  document.getElementById("nuevaConversacionBtn")
-    .addEventListener("click", nuevaConversacion)
-
-  // 🔥 AQUÍ VA appendChild 👇
-  data.forEach(conv => {
-
-    const item = document.createElement('div')
-    item.className = "p-2 cursor-pointer hover:bg-gray-100 rounded"
-    item.innerText = conv.titulo
-
-    item.onclick = () => cargarConversacion(conv.id)
-
-    // 🔥 IMPORTANTE
-    sidebarContent.appendChild(item)
-
-  })
-}
-/* =========================
-CARGAR CONVERSACIÓN
-========================= */
-
-async function cargarConversacion(id){
-
-  const res = await fetch(`/api/historial/${id}`)
-  const mensajes = await res.json()
-
-  conversacionId = id
-  chat.innerHTML = ""
-
-  mensajes.forEach(m => {
-
-    const div = crearMensajeWrapper(m.es_usuario)
-
-    if(m.es_usuario){
-
-      div.innerHTML = `
-      <div class="bg-[#e8f5f0] border border-[#1a7a5e]/20 px-4 py-3 rounded-2xl max-w-sm shadow">
-        ${m.contenido}
-      </div>
-      `
-
-    }else{
-
-      let html = ""
-
-      try {
-        const data = JSON.parse(m.contenido)
-        html = generarHTMLDesdeJSON(data)
-      } catch {
-        html = m.contenido
-      }
-
-      div.innerHTML = `
-      <div class="bg-white border border-gray-200 px-4 py-3 rounded-2xl max-w-md shadow-sm">
-        ${html}
-      </div>
-      `
+    if (!Array.isArray(data) || data.length === 0) {
+      const vacio = document.createElement("div")
+      vacio.style.cssText = "font-size:12px;color:#9CA3A0;padding:8px 8px;"
+      vacio.textContent = idioma === "es" ? "Sin búsquedas aún" : "No searches yet"
+      sidebarInner.appendChild(vacio)
+      return
     }
 
-    chat.appendChild(div)
-  })
+    const dotColors = ["#1A5C42", "#C8973A", "#7A5A1A", "#0D3D2E", "#A32D2D"]
 
-  scrollChat()
+    data.forEach((conv, i) => {
+      const item = document.createElement("div")
+      item.className = "historial-item"
+      if (conv.id === conversacionId) item.classList.add("activo")
+
+      item.innerHTML = `
+        <div class="historial-dot" style="background:${dotColors[i % dotColors.length]}"></div>
+        <div class="historial-info">
+          <div class="historial-titulo">${conv.titulo || "—"}</div>
+          <div class="historial-meta">${formatearFecha(conv.created_at || conv.fecha)}</div>
+        </div>
+      `
+
+      item.addEventListener("click", () => cargarConversacion(conv.id))
+      sidebarInner.appendChild(item)
+    })
+
+  } catch (err) {
+    console.error("Error cargando historial:", err)
+    // No bloquear la UI si el historial falla
+  }
+}
+
+function formatearFecha(fechaStr) {
+  if (!fechaStr) return ""
+  try {
+    const fecha = new Date(fechaStr)
+    const ahora = new Date()
+    const diff  = ahora - fecha
+    const mins  = Math.floor(diff / 60000)
+    const horas = Math.floor(diff / 3600000)
+    const dias  = Math.floor(diff / 86400000)
+
+    if (mins < 1)   return idioma === "es" ? "ahora mismo" : "just now"
+    if (mins < 60)  return idioma === "es" ? `hace ${mins} min` : `${mins} min ago`
+    if (horas < 24) return idioma === "es" ? `hace ${horas}h` : `${horas}h ago`
+    if (dias === 1) return idioma === "es" ? "ayer" : "yesterday"
+    return idioma === "es" ? `hace ${dias} días` : `${dias} days ago`
+  } catch {
+    return ""
+  }
 }
 
 /* =========================
-EVENTOS
+  CARGAR CONVERSACIÓN
 ========================= */
+async function cargarConversacion(id) {
+  try {
+    mostrarLoading()
 
+    const res = await fetch(`/api/historial/${id}`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const mensajes = await res.json()
+
+    conversacionId = id
+
+    // Último mensaje del bot y del usuario
+    const botMsg  = [...mensajes].reverse().find(m => !m.es_usuario)
+    const userMsg = [...mensajes].reverse().find(m => m.es_usuario)
+
+    if (!botMsg) {
+      mostrarEstadoVacio()
+      return
+    }
+
+    // ✅ Parse robusto
+    let contenido = {}
+    try {
+      const raw = typeof botMsg.contenido === "string"
+        ? botMsg.contenido
+        : JSON.stringify(botMsg.contenido)
+      contenido = JSON.parse(raw)
+    } catch {
+      contenido = {}
+    }
+
+    const nombre = userMsg?.contenido || ""
+    nombreMedActivo = nombre
+
+    // Restaurar filtros según keys del contenido guardado
+    filtrosSeleccionados = Object.keys(contenido).filter(k =>
+      Array.isArray(contenido[k]) && contenido[k].length > 0
+    )
+
+    // Sincronizar pills
+    document.querySelectorAll(".hero-pill").forEach(btn => btn.classList.remove("activo"))
+    filtrosSeleccionados.forEach(f => {
+      document.getElementById(`heroPill-${f}`)?.classList.add("activo")
+    })
+
+    renderizarMedicamento(nombre, contenido)
+
+    // Marcar activo en sidebar
+    document.querySelectorAll(".historial-item").forEach(el => {
+      el.classList.toggle("activo", el.dataset.convId === String(id))
+    })
+
+  } catch (err) {
+    console.error("Error cargando conversación:", err)
+    mostrarMensaje(t().error, "", "error")
+  }
+}
+
+/* =========================
+  NUEVA CONSULTA
+========================= */
+function nuevaConsulta() {
+  conversacionId       = null
+  filtrosSeleccionados = []
+  nombreMedActivo      = ""
+
+  document.querySelectorAll(".hero-pill").forEach(btn => btn.classList.remove("activo"))
+  document.querySelectorAll(".historial-item").forEach(el => el.classList.remove("activo"))
+  input.value = ""
+
+  mostrarEstadoVacio()
+}
+
+/* =========================
+  EVENTOS
+========================= */
 boton.addEventListener("click", enviarConsulta)
 
 input.addEventListener("keypress", e => {
-  if(e.key === "Enter") enviarConsulta()
+  if (e.key === "Enter") enviarConsulta()
 })
 
 /* =========================
-INIT
+  INIT
 ========================= */
-
-function init(){
+function init() {
   aplicarIdioma()
-  inputContainer.style.display = "none"
+  mostrarEstadoVacio()
   cargarHistorial()
 }
 
 init()
-
-function nuevaConversacion(){
-
-  conversacionId = null
-  filtrosSeleccionados = []
-
-  document.querySelectorAll(".filtro-btn").forEach(btn => {
-    btn.classList.remove("filtro-activo")
-  })
-
-  inputContainer.style.display = "none"
-  input.value = ""
-
-  // 🔥 VOLVER A PINTAR TODO (texto + filtros)
-  chat.innerHTML = `
-  
-  <div class="text-center py-10 px-4 m-auto max-w-sm">
-    <h2 class="font-['Playfair_Display',serif] text-2xl text-[#135c47] mb-2">
-      ${t().tituloInicio}
-    </h2>
-    <p class="text-sm text-[#5a7a6e]">
-      ${t().subtituloInicio}
-    </p>
-  </div>
-
-  <div class="bg-white rounded-2xl p-5 shadow-lg max-w-md">
-
-    <div class="grid grid-cols-2 gap-2 mt-3">
-
-      <button onclick="seleccionarFiltro('general',this)" class="filtro-btn">
-        📋 <span>${t().general}</span>
-      </button>
-
-      <button onclick="seleccionarFiltro('indicaciones',this)" class="filtro-btn">
-        🩺 <span>${t().indicaciones}</span>
-      </button>
-
-      <button onclick="seleccionarFiltro('dosificacion',this)" class="filtro-btn">
-        💉 <span>${t().dosificacion}</span>
-      </button>
-
-      <button onclick="seleccionarFiltro('advertencias',this)" class="filtro-btn">
-        ⚠️ <span>${t().advertencias}</span>
-      </button>
-
-    </div>
-
-    <button onclick="seleccionarFiltro('especial',this)"
-    class="filtro-btn w-full mt-2">
-      ✨ <span>${t().especial}</span>
-    </button>
-
-  </div>
-  `
-}
