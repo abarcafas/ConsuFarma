@@ -309,6 +309,12 @@ async function fetchConsulta(payload) {
   CONSULTA PRINCIPAL
 ========================= */
 async function enviarConsulta() {
+  // Bloquear si no está autenticado
+  if (typeof usuarioAutenticado !== 'undefined' && !usuarioAutenticado) {
+    document.getElementById('auth-blocker')?.classList.add('visible')
+    return
+  }
+
   const medicamento = input.value.trim()
   if (!medicamento) return
 
@@ -352,35 +358,49 @@ async function enviarConsulta() {
   HISTORIAL
 ========================= */
 async function cargarHistorial() {
+  if (typeof usuarioAutenticado !== 'undefined' && !usuarioAutenticado) return
+
+  const sidebarTop = document.getElementById("sidebar-top")
+
+  // Spinner solo en el área scrolleable
+  sidebarInner.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 0;gap:10px;">
+      <div style="width:18px;height:18px;border:2.5px solid #E8F5EE;border-top-color:#0D3D2E;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+      <span style="font-size:11px;color:#7A9E8C;">Cargando...</span>
+    </div>
+  `
+
   try {
     const res = await fetch("/api/historial")
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
     const data = await res.json()
 
+    // Parte fija: botón + label (solo se pinta una vez)
+    if (sidebarTop) {
+      sidebarTop.innerHTML = ""
+      const btnNueva = document.createElement("button")
+      btnNueva.id = "nuevaConversacionBtn"
+      btnNueva.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        ${t().nueva}
+      `
+      btnNueva.addEventListener("click", nuevaConsulta)
+      sidebarTop.appendChild(btnNueva)
+
+      const label = document.createElement("div")
+      label.className = "sidebar-label"
+      label.textContent = t().historial
+      sidebarTop.appendChild(label)
+    }
+
+    // Parte scrolleable: solo los items
     sidebarInner.innerHTML = ""
-
-    // Botón nueva consulta
-    const btnNueva = document.createElement("button")
-    btnNueva.id = "nuevaConversacionBtn"
-    btnNueva.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
-        <path d="M12 5v14M5 12h14"/>
-      </svg>
-      ${t().nueva}
-    `
-    btnNueva.addEventListener("click", nuevaConsulta)
-    sidebarInner.appendChild(btnNueva)
-
-    // Label
-    const label = document.createElement("div")
-    label.className = "sidebar-label"
-    label.textContent = t().historial
-    sidebarInner.appendChild(label)
 
     if (!Array.isArray(data) || data.length === 0) {
       const vacio = document.createElement("div")
-      vacio.style.cssText = "font-size:12px;color:#9CA3A0;padding:8px 8px;"
+      vacio.style.cssText = "font-size:12px;color:#9CA3A0;padding:8px;"
       vacio.textContent = idioma === "es" ? "Sin búsquedas aún" : "No searches yet"
       sidebarInner.appendChild(vacio)
       return
@@ -391,6 +411,7 @@ async function cargarHistorial() {
     data.forEach((conv, i) => {
       const item = document.createElement("div")
       item.className = "historial-item"
+      item.dataset.convId = String(conv.id)
       if (conv.id === conversacionId) item.classList.add("activo")
 
       item.innerHTML = `
@@ -407,7 +428,7 @@ async function cargarHistorial() {
 
   } catch (err) {
     console.error("Error cargando historial:", err)
-    // No bloquear la UI si el historial falla
+    sidebarInner.innerHTML = `<div style="font-size:12px;color:#9CA3A0;padding:8px;">Error al cargar</div>`
   }
 }
 

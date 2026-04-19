@@ -33,7 +33,7 @@
     ===================== */
     #navbar {
       position: relative;
-      z-index: 60;
+      z-index: 110;
       height: 58px;
       background: white;
       border-bottom: 1px solid rgba(13,61,46,0.10);
@@ -54,7 +54,7 @@
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .logo-box svg { width: 18px; height: 18px; fill: white; }
+    .logo-box svg { width: 100%; height: 100%; fill: white; }
 
     .logo-text h2 {
       font-family: 'Playfair Display', serif;
@@ -98,7 +98,7 @@
       transition: background 0.2s;
       white-space: nowrap;
     }
-    .btn-registro:hover { background: var(--verde-medio); }
+    .btn-login, .btn-registro { text-decoration: none; display: inline-flex; align-items: center; }
 
     /* Burger — solo móvil */
     #sidebar-toggle {
@@ -113,10 +113,6 @@
       flex-shrink: 0;
     }
 
-    /* =====================
-       BODY WRAPPER
-       sidebar | right-col
-    ===================== */
     #body-wrap {
       display: flex;
       height: calc(100vh - 58px);
@@ -125,7 +121,6 @@
 
     /* =====================
        SIDEBAR
-       ocupa hero + panel
     ===================== */
     #sidebar {
       width: var(--sidebar-w);
@@ -134,6 +129,8 @@
       border-right: 1.5px solid rgba(13,61,46,0.10);
       display: flex;
       flex-direction: column;
+      height: calc(100vh - 58px);
+      max-height: calc(100vh - 58px);
       overflow: hidden;
       transition: transform 0.3s ease;
       z-index: 40;
@@ -141,14 +138,15 @@
 
     #sidebar-inner {
       flex: 1;
-      overflow-y: auto;
+      overflow-y: scroll;
       padding: 14px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
+      min-height: 0;
+      overscroll-behavior: contain;
     }
-    #sidebar-inner::-webkit-scrollbar { width: 3px; }
-    #sidebar-inner::-webkit-scrollbar-thumb { background: #c8e6d4; border-radius: 3px; }
+    #sidebar-inner::-webkit-scrollbar { width: 4px; }
+    #sidebar-inner::-webkit-scrollbar-track { background: transparent; }
+    #sidebar-inner::-webkit-scrollbar-thumb { background: #c8e6d4; border-radius: 4px; }
+    #sidebar-inner::-webkit-scrollbar-thumb:hover { background: #7A9E8C; }
 
     .sidebar-label {
       font-size: 10px;
@@ -186,6 +184,7 @@
       border-radius: 9px;
       cursor: pointer;
       transition: background 0.15s;
+      margin-bottom: 2px;
     }
     .historial-item:hover  { background: var(--crema); }
     .historial-item.activo { background: var(--verde-claro); }
@@ -233,6 +232,16 @@
       flex-shrink: 0;
       position: relative;
       overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='%23ffffff' opacity='0.08'%3E%3Cg transform='rotate(-35 55 38)'%3E%3Crect x='30' y='30' width='44' height='18' rx='9'/%3E%3Crect x='30' y='30' width='22' height='18' rx='0' opacity='0.4'/%3E%3Cline x1='52' y1='30' x2='52' y2='48' stroke='%230D3D2E' stroke-width='1.5'/%3E%3C/g%3E%3Cg transform='rotate(20 220 45)'%3E%3Crect x='185' y='38' width='50' height='12' rx='3'/%3E%3Cpolygon points='235,38 235,50 252,44'/%3E%3Crect x='179' y='35' width='7' height='18' rx='2'/%3E%3Crect x='192' y='36' width='2' height='14' fill='%230D3D2E' opacity='0.6'/%3E%3Crect x='202' y='36' width='2' height='14' fill='%230D3D2E' opacity='0.6'/%3E%3Crect x='212' y='36' width='2' height='14' fill='%230D3D2E' opacity='0.6'/%3E%3C/g%3E%3Cg transform='rotate(15 80 148)'%3E%3Ccircle cx='80' cy='148' r='20'/%3E%3Crect x='61' y='146' width='38' height='4' rx='2' fill='%230D3D2E' opacity='0.5'/%3E%3C/g%3E%3Cg transform='rotate(-10 230 140)'%3E%3Crect x='218' y='152' width='26' height='34' rx='5'/%3E%3Crect x='222' y='140' width='18' height='14' rx='3'/%3E%3Crect x='220' y='136' width='22' height='6' rx='2'/%3E%3Crect x='218' y='162' width='26' height='3' fill='%230D3D2E' opacity='0.4'/%3E%3Crect x='218' y='171' width='26' height='3' fill='%230D3D2E' opacity='0.4'/%3E%3C/g%3E%3Crect x='55' y='228' width='30' height='10' rx='3'/%3E%3Crect x='65' y='218' width='10' height='30' rx='3'/%3E%3Cg transform='rotate(50 230 248)'%3E%3Crect x='200' y='238' width='54' height='20' rx='10'/%3E%3Crect x='200' y='238' width='27' height='20' rx='0' opacity='0.4'/%3E%3Cline x1='227' y1='238' x2='227' y2='258' stroke='%230D3D2E' stroke-width='1.5'/%3E%3C/g%3E%3Cg transform='rotate(-15 155 155)'%3E%3Crect x='115' y='144' width='80' height='28' rx='5' opacity='0.5'/%3E%3Ccircle cx='133' cy='158' r='9'/%3E%3Ccircle cx='155' cy='158' r='9'/%3E%3Ccircle cx='177' cy='158' r='9'/%3E%3C/g%3E%3Cg transform='rotate(25 155 258)'%3E%3Crect x='149' y='228' width='8' height='32' rx='4'/%3E%3Ccircle cx='153' cy='262' r='8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-size: 300px 300px;
+      pointer-events: none;
+      z-index: 0;
     }
 
     .hero-deco {
@@ -625,6 +634,76 @@
       .card-header-info h2 { font-size: 15px; }
       .bloque-texto { font-size: 12px; }
     }
+    /* =====================
+       MODAL BLOQUEO AUTH
+    ===================== */
+    #auth-blocker {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(13,61,46,0.55);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+    }
+    #auth-blocker.visible { display: flex; }
+
+    .auth-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 36px 32px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: fadeUp 0.25s ease;
+      position: relative;
+    }
+    .auth-modal-icon {
+      font-size: 40px;
+      margin-bottom: 14px;
+    }
+    .auth-modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      color: var(--verde-oscuro);
+      margin-bottom: 8px;
+    }
+    .auth-modal p {
+      font-size: 14px;
+      color: var(--verde-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .auth-modal-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .auth-modal-btns a {
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s;
+    }
+    .auth-modal-btns .modal-login {
+      border: 1.5px solid var(--verde-oscuro);
+      color: var(--verde-oscuro);
+      background: transparent;
+    }
+    .auth-modal-btns .modal-login:hover { background: var(--verde-claro); }
+    .auth-modal-btns .modal-registro {
+      background: var(--verde-oscuro);
+      color: white;
+      border: none;
+    }
+    .auth-modal-btns .modal-registro:hover { background: var(--verde-medio); }
+
   </style>
 </head>
 <body>
@@ -639,8 +718,8 @@
       </button>
 
       <div class="logo-box">
-        <svg viewBox="0 0 24 24">
-          <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/>
+        <svg viewBox="0 0 36 36" width="36" height="36">
+          <text x="18" y="16" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="white" font-family="'Playfair Display', Georgia, serif" transform="rotate(-90, 18, 18)">M</text>
         </svg>
       </div>
 
@@ -651,8 +730,14 @@
     </div>
 
     <div class="nav-right">
-      <button class="btn-login"    id="btnLogin">Iniciar sesión</button>
-      <button class="btn-registro" id="btnRegistro">Registrarse</button>
+      <% if (usuario) { %>
+        <!-- Usuario autenticado: solo botón cerrar sesión -->
+        <a href="/logout" class="btn-registro">Cerrar sesión</a>
+      <% } else { %>
+        <!-- Sin sesión: login y registro -->
+        <a href="/login"    class="btn-login">Iniciar sesión</a>
+        <a href="/register" class="btn-registro">Registrarse</a>
+      <% } %>
     </div>
   </nav>
 
@@ -673,7 +758,12 @@
           </svg>
         </button>
       </div>
-      <div id="sidebar-inner">
+      <!-- Parte fija: botón + label -->
+      <div id="sidebar-top" style="padding:14px 10px 6px;flex-shrink:0;">
+        <!-- Inyectado por JS -->
+      </div>
+      <!-- Parte scrolleable: solo los items -->
+      <div id="sidebar-inner" style="flex:1;overflow-y:auto;padding:0 10px 14px;min-height:0;">
         <!-- Inyectado por JS -->
       </div>
     </aside>
@@ -683,10 +773,6 @@
 
       <!-- Hero con buscador y filtros -->
       <section id="hero">
-        <div class="hero-deco" style="width:70px;height:70px;top:-18px;left:40px;transform:rotate(-30deg);border-radius:40% 60%;"></div>
-        <div class="hero-deco" style="width:55px;height:22px;bottom:14px;left:160px;transform:rotate(20deg);"></div>
-        <div class="hero-deco" style="width:80px;height:32px;top:16px;right:80px;transform:rotate(-15deg);"></div>
-        <div class="hero-deco" style="width:45px;height:18px;bottom:20px;right:160px;transform:rotate(35deg);"></div>
 
         <h1 id="heroTitulo">Consulta cualquier medicamento</h1>
         <p id="heroSubtitulo">Información confiable al instante — dosificación, efectos e indicaciones</p>
@@ -718,7 +804,8 @@
   </div><!-- /body-wrap -->
 
   <script>
-    const idiomaUsuario = "<%= usuario.idioma %>";
+    const idiomaUsuario = "<%= usuario ? usuario.idioma : 'es' %>";
+    const usuarioAutenticado = <%= usuario ? 'true' : 'false' %>;
   </script>
   <script src="/public/js/dashboardUser.js"></script>
 
@@ -742,7 +829,44 @@
 
     document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
     overlay.addEventListener('click', closeSidebar);
+
+    // Mostrar modal si no está autenticado
+    // Los botones del navbar siguen funcionando — el modal no los tapa
+    if (!usuarioAutenticado) {
+      document.getElementById('auth-blocker').classList.add('visible');
+    } else {
+      // Si está autenticado, cambiar botones a cerrar sesión
+      document.getElementById('btnLogin').style.display = 'none';
+      document.getElementById('btnRegistro').textContent = 'Cerrar sesión';
+      document.getElementById('btnRegistro').addEventListener('click', () => {
+        window.location.href = '/logout';
+      }, { once: true });
+    }
   </script>
+
+  <!-- ===== MODAL BLOQUEO (solo si no autenticado) ===== -->
+  <div id="auth-blocker">
+    <div class="auth-modal">
+      <button id="auth-modal-close" onclick="document.getElementById('auth-blocker').classList.remove('visible')" style="position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:8px;border:none;background:var(--crema);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0D3D2E" stroke-width="2.5" stroke-linecap="round">
+          <path d="M18 6 6 18M6 6l12 12"/>
+        </svg>
+      </button>
+      <div style="display:flex;justify-content:center;margin-bottom:14px;">
+        <div class="logo-box" style="width:52px;height:52px;border-radius:14px;">
+          <svg viewBox="0 0 36 36" width="36" height="36">
+            <text x="18" y="16" text-anchor="middle" dominant-baseline="central" font-size="26" font-weight="800" fill="white" font-family="'Playfair Display', Georgia, serif" transform="rotate(-90, 18, 18)">M</text>
+          </svg>
+        </div>
+      </div>
+      <h3>Bienvenido a MediConsulta</h3>
+      <p>Inicia sesión o regístrate para consultar información sobre medicamentos.</p>
+      <div class="auth-modal-btns">
+        <a href="/login"    class="modal-login">Iniciar sesión</a>
+        <a href="/register" class="modal-registro">Registrarse</a>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

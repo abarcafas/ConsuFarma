@@ -13,12 +13,12 @@ body {
   position: relative;
 }
 
-/* Fondo degradado fijo */
+/* Fondo degradado fijo — misma paleta del dashboard */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, #0f6d4a, #1f8f6a);
+  background: linear-gradient(135deg, #0D3D2E, #1A5C42);
   z-index: -2;
 }
 
@@ -28,7 +28,7 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='%23ffffff' opacity='0.08'%3E%3Cg transform='rotate(-35 55 38)'%3E%3Crect x='30' y='30' width='44' height='18' rx='9'/%3E%3Crect x='30' y='30' width='22' height='18' rx='0' opacity='0.4'/%3E%3Cline x1='52' y1='30' x2='52' y2='48' stroke='%230f6d4a' stroke-width='1.5'/%3E%3C/g%3E%3Cg transform='rotate(20 220 45)'%3E%3Crect x='185' y='38' width='50' height='12' rx='3'/%3E%3Cpolygon points='235,38 235,50 252,44'/%3E%3Crect x='179' y='35' width='7' height='18' rx='2'/%3E%3Crect x='192' y='36' width='2' height='14' fill='%230f6d4a' opacity='0.6'/%3E%3Crect x='202' y='36' width='2' height='14' fill='%230f6d4a' opacity='0.6'/%3E%3Crect x='212' y='36' width='2' height='14' fill='%230f6d4a' opacity='0.6'/%3E%3C/g%3E%3Cg transform='rotate(15 80 148)'%3E%3Ccircle cx='80' cy='148' r='20'/%3E%3Crect x='61' y='146' width='38' height='4' rx='2' fill='%230f6d4a' opacity='0.5'/%3E%3C/g%3E%3Cg transform='rotate(-10 230 140)'%3E%3Crect x='218' y='152' width='26' height='34' rx='5'/%3E%3Crect x='222' y='140' width='18' height='14' rx='3'/%3E%3Crect x='220' y='136' width='22' height='6' rx='2'/%3E%3Crect x='218' y='162' width='26' height='3' fill='%230f6d4a' opacity='0.4'/%3E%3Crect x='218' y='171' width='26' height='3' fill='%230f6d4a' opacity='0.4'/%3E%3C/g%3E%3Crect x='55' y='228' width='30' height='10' rx='3'/%3E%3Crect x='65' y='218' width='10' height='30' rx='3'/%3E%3Cg transform='rotate(50 230 248)'%3E%3Crect x='200' y='238' width='54' height='20' rx='10'/%3E%3Crect x='200' y='238' width='27' height='20' rx='0' opacity='0.4'/%3E%3Cline x1='227' y1='238' x2='227' y2='258' stroke='%230f6d4a' stroke-width='1.5'/%3E%3C/g%3E%3Cg transform='rotate(-15 155 155)'%3E%3Crect x='115' y='144' width='80' height='28' rx='5' opacity='0.5'/%3E%3Ccircle cx='133' cy='158' r='9'/%3E%3Ccircle cx='155' cy='158' r='9'/%3E%3Ccircle cx='177' cy='158' r='9'/%3E%3C/g%3E%3Cg transform='rotate(25 155 258)'%3E%3Crect x='149' y='228' width='8' height='32' rx='4'/%3E%3Ccircle cx='153' cy='262' r='8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='%23ffffff' opacity='0.08'%3E%3Cg transform='rotate(-35 55 38)'%3E%3Crect x='30' y='30' width='44' height='18' rx='9'/%3E%3Crect x='30' y='30' width='22' height='18' rx='0' opacity='0.4'/%3E%3Cline x1='52' y1='30' x2='52' y2='48' stroke='%230D3D2E' stroke-width='1.5'/%3E%3C/g%3E%3Cg transform='rotate(20 220 45)'%3E%3Crect x='185' y='38' width='50' height='12' rx='3'/%3E%3Cpolygon points='235,38 235,50 252,44'/%3E%3Crect x='179' y='35' width='7' height='18' rx='2'/%3E%3Crect x='192' y='36' width='2' height='14' fill='%230D3D2E' opacity='0.6'/%3E%3Crect x='202' y='36' width='2' height='14' fill='%230D3D2E' opacity='0.6'/%3E%3Crect x='212' y='36' width='2' height='14' fill='%230D3D2E' opacity='0.6'/%3E%3C/g%3E%3Cg transform='rotate(15 80 148)'%3E%3Ccircle cx='80' cy='148' r='20'/%3E%3Crect x='61' y='146' width='38' height='4' rx='2' fill='%230D3D2E' opacity='0.5'/%3E%3C/g%3E%3Cg transform='rotate(-10 230 140)'%3E%3Crect x='218' y='152' width='26' height='34' rx='5'/%3E%3Crect x='222' y='140' width='18' height='14' rx='3'/%3E%3Crect x='220' y='136' width='22' height='6' rx='2'/%3E%3Crect x='218' y='162' width='26' height='3' fill='%230D3D2E' opacity='0.4'/%3E%3Crect x='218' y='171' width='26' height='3' fill='%230D3D2E' opacity='0.4'/%3E%3C/g%3E%3Crect x='55' y='228' width='30' height='10' rx='3'/%3E%3Crect x='65' y='218' width='10' height='30' rx='3'/%3E%3Cg transform='rotate(50 230 248)'%3E%3Crect x='200' y='238' width='54' height='20' rx='10'/%3E%3Crect x='200' y='238' width='27' height='20' rx='0' opacity='0.4'/%3E%3Cline x1='227' y1='238' x2='227' y2='258' stroke='%230D3D2E' stroke-width='1.5'/%3E%3C/g%3E%3Cg transform='rotate(-15 155 155)'%3E%3Crect x='115' y='144' width='80' height='28' rx='5' opacity='0.5'/%3E%3Ccircle cx='133' cy='158' r='9'/%3E%3Ccircle cx='155' cy='158' r='9'/%3E%3Ccircle cx='177' cy='158' r='9'/%3E%3C/g%3E%3Cg transform='rotate(25 155 258)'%3E%3Crect x='149' y='228' width='8' height='32' rx='4'/%3E%3Ccircle cx='153' cy='262' r='8'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   background-size: 300px 300px;
 }
 
@@ -44,19 +44,20 @@ body::before {
 .logo-medical {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #1a7a5e, #25a87e);
+  background: linear-gradient(135deg, #0D3D2E, #1A5C42);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
-  box-shadow: 0 12px 32px rgba(26,122,94,0.25);
+  box-shadow: 0 12px 32px rgba(13,61,46,0.30);
 }
+
 .brand-title {
   font-family: 'Playfair Display', serif;
   font-weight: 700;
   font-size: 26px;
-  color: #135c47;
+  color: #0D3D2E;
   margin-bottom: 4px;
 }
 
@@ -64,7 +65,7 @@ body::before {
 .form-label {
   font-size: 13px;
   font-weight: 700;
-  color: #5a7a6e;
+  color: #7A9E8C;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -72,40 +73,42 @@ body::before {
 /* ---------- Inputs y selects ---------- */
 .form-control,
 .form-select {
-  border: 2px solid #e0ede9;
+  border: 2px solid #E0DDD6;
   border-radius: 12px;
   padding: 13px 16px;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 15px;
-  background: #f8fdfb;
+  background: #F7F4EF;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-control::placeholder {
-  color: #9ab5aa;
+  color: #B0ADA8;
 }
 
 .form-control:focus,
 .form-select:focus {
-  border-color: #1f8f6a;
+  border-color: #1A5C42;
   background: #ffffff;
-  box-shadow: 0 0 0 4px rgba(31, 143, 106, 0.1);
+  box-shadow: 0 0 0 4px rgba(13,61,46,0.10);
 }
 
 /* ---------- Botón principal ---------- */
 .btn-custom {
-  background: linear-gradient(135deg, #1a7a5e, #25a87e);
+  background: #0D3D2E;
   border: none;
   border-radius: 14px;
   padding: 12px;
   font-weight: 700;
+  font-family: 'Nunito', sans-serif;
   transition: all 0.2s ease;
-  box-shadow: 0 6px 16px rgba(26,122,94,0.25);
+  box-shadow: 0 6px 16px rgba(13,61,46,0.25);
 }
 
 .btn-custom:hover {
+  background: #1A5C42 !important;
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(26,122,94,0.35);
+  box-shadow: 0 10px 20px rgba(13,61,46,0.30);
 }
 
 @media (max-width: 480px) {
