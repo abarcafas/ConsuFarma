@@ -24,7 +24,7 @@ const traducciones = {
     dosificacion:    "Dosificación",
     advertencias:    "Advertencias",
     especial:        "Info especial",
-    placeholder:     "Busca un medicamento",
+    placeholder:     "Busca un medicamento, principio activo o marca...",
     buscando:        "Consultando...",
     error:           "Error al consultar el medicamento. Intenta de nuevo.",
     sinFiltro:       "Selecciona al menos una categoría antes de buscar.",
@@ -47,7 +47,7 @@ const traducciones = {
     dosificacion:    "Dosage",
     advertencias:    "Warnings",
     especial:        "Special info",
-    placeholder:     "Search for a medicine",
+    placeholder:     "Search for a medicine, active ingredient or brand...",
     buscando:        "Consulting...",
     error:           "Error consulting medicine. Please try again.",
     sinFiltro:       "Select at least one category before searching.",
@@ -154,10 +154,11 @@ function mostrarMensaje(titulo, subtitulo = "", tipo = "info") {
 ========================= */
 function renderizarMedicamento(nombre, contenido) {
 
-  // Badge: filtros que tienen datos reales
-  const filtrosConData = filtrosSeleccionados.filter(f => contenido[f]?.length > 0)
-  const badge = (filtrosConData.length ? filtrosConData : filtrosSeleccionados)
-    .map(f => t()[f] || f).join(" · ")
+  // Badge: derivado de las keys del contenido, no de filtrosSeleccionados
+  const badge = Object.keys(contenido)
+    .filter(f => Array.isArray(contenido[f]) && contenido[f].length > 0)
+    .map(f => t()[f] || f)
+    .join(" · ")
 
   // Extraer clase farmacológica para subtítulo del header
   let claseText = ""
@@ -325,10 +326,6 @@ async function enviarConsulta() {
       conversacionId
     })
 
-    if (data.conversacionId) {
-      conversacionId = data.conversacionId
-    }
-
     if (!data.encontrado) {
       mostrarMensaje(t().noEncontrado, t().noEncontradoSub, "info")
       return
@@ -338,7 +335,11 @@ async function enviarConsulta() {
     nombreMedActivo = data.nombre || medicamento
     renderizarMedicamento(nombreMedActivo, data.contenido)
 
-    // Refrescar historial (sin await para no bloquear UI)
+    // Resetear input, filtros y pills para la próxima búsqueda
+    input.value = ""
+    filtrosSeleccionados = []
+    document.querySelectorAll(".hero-pill").forEach(btn => btn.classList.remove("activo"))
+
     cargarHistorial()
 
   } catch (err) {
@@ -466,16 +467,9 @@ async function cargarConversacion(id) {
     const nombre = userMsg?.contenido || ""
     nombreMedActivo = nombre
 
-    // Restaurar filtros según keys del contenido guardado
-    filtrosSeleccionados = Object.keys(contenido).filter(k =>
-      Array.isArray(contenido[k]) && contenido[k].length > 0
-    )
-
-    // Sincronizar pills
+    // No restaurar filtros — el usuario parte limpio para su próxima búsqueda
+    filtrosSeleccionados = []
     document.querySelectorAll(".hero-pill").forEach(btn => btn.classList.remove("activo"))
-    filtrosSeleccionados.forEach(f => {
-      document.getElementById(`heroPill-${f}`)?.classList.add("activo")
-    })
 
     renderizarMedicamento(nombre, contenido)
 
