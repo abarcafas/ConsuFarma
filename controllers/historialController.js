@@ -45,6 +45,20 @@ const getMensajesByConversacion = async (conversacionId) => {
   return result.rows
 }
 
+const eliminarConversacionQuery = async (conversacionId, usuarioId) => {
+  // Verificar que la conversación pertenece al usuario
+  const check = await db.query(
+    `SELECT id FROM conversaciones WHERE id = $1 AND usuario_id = $2`,
+    [conversacionId, usuarioId]
+  )
+  if (!check.rows.length) return false
+
+  // Eliminar mensajes primero (FK), luego la conversación
+  await db.query(`DELETE FROM mensajes WHERE conversacion_id = $1`, [conversacionId])
+  await db.query(`DELETE FROM conversaciones WHERE id = $1`, [conversacionId])
+  return true
+}
+
 /* =========================
 SERVICIOS
 ========================= */
@@ -92,9 +106,23 @@ const obtenerMensajes = async (req, res) => {
   }
 }
 
+const eliminarConversacion = async (req, res) => {
+  try {
+    const { id } = req.params
+    const usuarioId = req.usuario.id
+    const eliminado = await eliminarConversacionQuery(id, usuarioId)
+    if (!eliminado) return res.status(404).json({ error: "Conversación no encontrada" })
+    res.json({ ok: true })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: "Error eliminando conversación" })
+  }
+}
+
 module.exports = {
   crearConversacion,
   guardarMensaje,
   obtenerHistorial,
-  obtenerMensajes
+  obtenerMensajes,
+  eliminarConversacion
 }

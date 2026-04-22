@@ -413,22 +413,81 @@ async function cargarHistorial() {
       item.className = "historial-item"
       item.dataset.convId = String(conv.id)
       if (conv.id === conversacionId) item.classList.add("activo")
+      item.style.cssText = "display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;position:relative;"
 
       item.innerHTML = `
-        <div class="historial-dot" style="background:${dotColors[i % dotColors.length]}"></div>
-        <div class="historial-info">
+        <div class="historial-dot" style="background:${dotColors[i % dotColors.length]};flex-shrink:0;"></div>
+        <div class="historial-info" style="flex:1;min-width:0;">
           <div class="historial-titulo">${conv.titulo || "—"}</div>
           <div class="historial-meta">${formatearFecha(conv.created_at || conv.fecha)}</div>
         </div>
+        <button class="historial-delete-btn" data-id="${conv.id}" title="${idioma === 'es' ? 'Eliminar' : 'Delete'}"
+          style="opacity:0;width:22px;height:22px;border-radius:6px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.15s,background 0.15s;padding:0;">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#9CA3A0" stroke-width="2.5" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
       `
 
-      item.addEventListener("click", () => cargarConversacion(conv.id))
+      // Mostrar/ocultar botón X al hacer hover
+      item.addEventListener("mouseenter", () => {
+        const btn = item.querySelector(".historial-delete-btn")
+        if (btn) btn.style.opacity = "1"
+      })
+      item.addEventListener("mouseleave", () => {
+        const btn = item.querySelector(".historial-delete-btn")
+        if (btn) btn.style.opacity = "0"
+      })
+
+      // Click en el item carga la conversación
+      item.addEventListener("click", (e) => {
+        if (e.target.closest(".historial-delete-btn")) return
+        cargarConversacion(conv.id)
+      })
+
+      // Click en botón X elimina
+      const deleteBtn = item.querySelector(".historial-delete-btn")
+      deleteBtn.addEventListener("click", (e) => {
+        e.stopPropagation()
+        eliminarConversacion(conv.id, item)
+      })
+
       sidebarInner.appendChild(item)
     })
 
   } catch (err) {
     console.error("Error cargando historial:", err)
     sidebarInner.innerHTML = `<div style="font-size:12px;color:#9CA3A0;padding:8px;">Error al cargar</div>`
+  }
+}
+
+/* =========================
+  ELIMINAR CONVERSACIÓN
+========================= */
+async function eliminarConversacion(id, itemEl) {
+  try {
+    // Animación de salida
+    itemEl.style.transition = "opacity 0.2s, transform 0.2s"
+    itemEl.style.opacity = "0"
+    itemEl.style.transform = "translateX(-10px)"
+
+    const res = await fetch(`/api/historial/${id}`, { method: "DELETE" })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+
+    // Si era la conversación activa, limpiar panel
+    if (String(id) === String(conversacionId)) {
+      conversacionId = null
+      mostrarEstadoVacio()
+    }
+
+    // Remover del DOM tras la animación
+    setTimeout(() => itemEl.remove(), 200)
+
+  } catch (err) {
+    console.error("Error eliminando conversación:", err)
+    // Revertir animación si falla
+    itemEl.style.opacity = "1"
+    itemEl.style.transform = "translateX(0)"
   }
 }
 

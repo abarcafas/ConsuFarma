@@ -6,6 +6,7 @@
   <title>MediConsulta — Panel de Inteligencia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -524,12 +525,54 @@
       </select>
       <label>País</label>
       <select id="f-pais">
-        <option value="">Todos</option>
-        <option value="Costa Rica">Costa Rica</option>
-        <option value="México">México</option>
-        <option value="Colombia">Colombia</option>
-        <option value="Argentina">Argentina</option>
-        <option value="España">España</option>
+        <option value="">Todos los países</option>
+        <optgroup label="América Latina">
+          <option>Argentina</option><option>Bolivia</option><option>Brasil</option>
+          <option>Chile</option><option>Colombia</option><option>Costa Rica</option>
+          <option>Cuba</option><option>Ecuador</option><option>El Salvador</option>
+          <option>Guatemala</option><option>Haití</option><option>Honduras</option>
+          <option>Jamaica</option><option>México</option><option>Nicaragua</option>
+          <option>Panamá</option><option>Paraguay</option><option>Perú</option>
+          <option>Puerto Rico</option><option>República Dominicana</option>
+          <option>Trinidad y Tobago</option><option>Uruguay</option><option>Venezuela</option>
+        </optgroup>
+        <optgroup label="América del Norte">
+          <option>Canadá</option><option>Estados Unidos</option>
+        </optgroup>
+        <optgroup label="Europa">
+          <option>Alemania</option><option>Austria</option><option>Bélgica</option>
+          <option>Croacia</option><option>Dinamarca</option><option>Eslovaquia</option>
+          <option>Eslovenia</option><option>España</option><option>Finlandia</option>
+          <option>Francia</option><option>Grecia</option><option>Hungría</option>
+          <option>Irlanda</option><option>Italia</option><option>Noruega</option>
+          <option>Países Bajos</option><option>Polonia</option><option>Portugal</option>
+          <option>Reino Unido</option><option>República Checa</option>
+          <option>Rumanía</option><option>Suecia</option><option>Suiza</option>
+          <option>Ucrania</option>
+        </optgroup>
+        <optgroup label="Asia">
+          <option>Arabia Saudita</option><option>Bangladesh</option><option>China</option>
+          <option>Corea del Sur</option><option>Emiratos Árabes Unidos</option>
+          <option>Filipinas</option><option>India</option><option>Indonesia</option>
+          <option>Irak</option><option>Irán</option><option>Israel</option>
+          <option>Japón</option><option>Malasia</option><option>Myanmar</option>
+          <option>Nepal</option><option>Pakistán</option><option>Singapur</option>
+          <option>Sri Lanka</option><option>Tailandia</option><option>Taiwán</option>
+          <option>Turquía</option><option>Vietnam</option>
+        </optgroup>
+        <optgroup label="Oceanía">
+          <option>Australia</option><option>Nueva Zelanda</option>
+          <option>Papúa Nueva Guinea</option>
+        </optgroup>
+        <optgroup label="África">
+          <option>Angola</option><option>Argelia</option><option>Camerún</option>
+          <option>Costa de Marfil</option><option>Egipto</option><option>Etiopía</option>
+          <option>Ghana</option><option>Kenia</option><option>Libia</option>
+          <option>Madagascar</option><option>Marruecos</option><option>Mozambique</option>
+          <option>Nigeria</option><option>Senegal</option><option>Sudáfrica</option>
+          <option>Sudán</option><option>Tanzania</option><option>Túnez</option>
+          <option>Uganda</option>
+        </optgroup>
         <option value="Otro">Otro</option>
       </select>
       <label>Edad</label>
@@ -545,8 +588,6 @@
         <option value="">Todos</option>
         <option value="Español">Español</option>
         <option value="English">English</option>
-        <option value="Português">Português</option>
-        <option value="Français">Français</option>
       </select>
       <button id="btn-aplicar" onclick="cargarTodo()">Aplicar filtros</button>
     </div>
@@ -652,7 +693,7 @@
       return {
         desde, hasta,
         genero:   document.getElementById('f-genero').value,
-        pais:     document.getElementById('f-pais').value,
+        pais:     document.getElementById('f-pais').value || '',
         idioma:   document.getElementById('f-idioma').value,
         edad_min, edad_max
       }
@@ -1078,6 +1119,80 @@
 
     // Cargar al inicio
     cargarTodo()
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <style>
+    /* Select2 adaptado al tema del admin */
+    .select2-container--default .select2-selection--single {
+      height: 32px;
+      padding: 4px 10px;
+      border: 1.5px solid #E0DDD6;
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      background: var(--crema);
+      cursor: pointer;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 22px;
+      padding-left: 0;
+      color: var(--texto);
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 30px;
+      right: 6px;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--open .select2-selection--single {
+      border-color: var(--verde-medio);
+      outline: none;
+    }
+    .select2-dropdown {
+      border: 1.5px solid var(--verde-medio);
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      z-index: 9999;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+      border: 1px solid #E0DDD6;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+      border-color: var(--verde-medio);
+      outline: none;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+      background-color: var(--verde-oscuro);
+    }
+    .select2-container--default .select2-results__group {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--verde-muted);
+      padding: 8px 12px 3px;
+    }
+    #filtros-bar .select2-container {
+      min-width: 160px;
+    }
+  </style>
+  <script>
+    $('#f-pais').select2({
+      placeholder: 'Todos los países',
+      allowClear: true,
+      language: {
+        noResults: () => 'No se encontró ese país'
+      },
+      dropdownParent: document.getElementById('filtros-bar')
+    })
+
   </script>
 
 </body>

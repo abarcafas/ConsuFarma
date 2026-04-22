@@ -7,7 +7,66 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/public/css/auth.css">
+
+  <style>
+    /* Select2 integrado con el estilo de Bootstrap/MediConsulta */
+    .select2-container--default .select2-selection--single {
+      height: calc(2.25rem + 2px);
+      padding: 0.375rem 0.75rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.375rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      background-color: #fff;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 1.5;
+      padding-left: 0;
+      color: #212529;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: calc(2.25rem + 2px);
+      right: 8px;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--open .select2-selection--single {
+      border-color: #0D3D2E;
+      box-shadow: 0 0 0 0.2rem rgba(13,61,46,0.15);
+      outline: none;
+    }
+    .select2-dropdown {
+      border: 1px solid #0D3D2E;
+      border-radius: 0.375rem;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      padding: 6px 10px;
+      font-family: 'Nunito', sans-serif;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+      border-color: #0D3D2E;
+      outline: none;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+      background-color: #0D3D2E;
+    }
+    .select2-container--default .select2-results__group {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #7A9E8C;
+      padding: 8px 12px 4px;
+    }
+    .select2-container { width: 100% !important; }
+    .select2-selection__placeholder { color: #6c757d !important; }
+  </style>
 </head>
 
 <body>
@@ -48,14 +107,56 @@
         </div>
         <div class="col-6 text-start">
           <label class="form-label">País</label>
-          <select name="pais" class="form-select" required>
-            <option value="" disabled selected>Seleccionar</option>
-            <option>Costa Rica</option>
-            <option>México</option>
-            <option>Colombia</option>
-            <option>Argentina</option>
-            <option>España</option>
-            <option>Otro</option>
+          <select name="pais" id="select-pais" required>
+            <option value="" disabled selected>Buscar país...</option>
+            <optgroup label="América Latina">
+              <option>Argentina</option><option>Bolivia</option><option>Brasil</option>
+              <option>Chile</option><option>Colombia</option><option>Costa Rica</option>
+              <option>Cuba</option><option>Ecuador</option><option>El Salvador</option>
+              <option>Guatemala</option><option>Haití</option><option>Honduras</option>
+              <option>Jamaica</option><option>México</option><option>Nicaragua</option>
+              <option>Panamá</option><option>Paraguay</option><option>Perú</option>
+              <option>Puerto Rico</option><option>República Dominicana</option>
+              <option>Trinidad y Tobago</option><option>Uruguay</option><option>Venezuela</option>
+            </optgroup>
+            <optgroup label="América del Norte">
+              <option>Canadá</option><option>Estados Unidos</option>
+            </optgroup>
+            <optgroup label="Europa">
+              <option>Alemania</option><option>Austria</option><option>Bélgica</option>
+              <option>Croacia</option><option>Dinamarca</option><option>Eslovaquia</option>
+              <option>Eslovenia</option><option>España</option><option>Finlandia</option>
+              <option>Francia</option><option>Grecia</option><option>Hungría</option>
+              <option>Irlanda</option><option>Italia</option><option>Noruega</option>
+              <option>Países Bajos</option><option>Polonia</option><option>Portugal</option>
+              <option>Reino Unido</option><option>República Checa</option>
+              <option>Rumanía</option><option>Suecia</option><option>Suiza</option>
+              <option>Ucrania</option>
+            </optgroup>
+            <optgroup label="Asia">
+              <option>Arabia Saudita</option><option>Bangladesh</option><option>China</option>
+              <option>Corea del Sur</option><option>Emiratos Árabes Unidos</option>
+              <option>Filipinas</option><option>India</option><option>Indonesia</option>
+              <option>Irak</option><option>Irán</option><option>Israel</option>
+              <option>Japón</option><option>Malasia</option><option>Myanmar</option>
+              <option>Nepal</option><option>Pakistán</option><option>Singapur</option>
+              <option>Sri Lanka</option><option>Tailandia</option><option>Taiwán</option>
+              <option>Turquía</option><option>Vietnam</option>
+            </optgroup>
+            <optgroup label="Oceanía">
+              <option>Australia</option><option>Nueva Zelanda</option>
+              <option>Papúa Nueva Guinea</option>
+            </optgroup>
+            <optgroup label="África">
+              <option>Angola</option><option>Argelia</option><option>Camerún</option>
+              <option>Costa de Marfil</option><option>Egipto</option><option>Etiopía</option>
+              <option>Ghana</option><option>Kenia</option><option>Libia</option>
+              <option>Madagascar</option><option>Marruecos</option><option>Mozambique</option>
+              <option>Nigeria</option><option>Senegal</option><option>Sudáfrica</option>
+              <option>Sudán</option><option>Tanzania</option><option>Túnez</option>
+              <option>Uganda</option>
+            </optgroup>
+            <option value="Otro">Otro</option>
           </select>
         </div>
       </div>
@@ -88,6 +189,18 @@
     </p>
 
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script>
+    $('#select-pais').select2({
+      placeholder: 'Buscar país...',
+      allowClear: false,
+      language: {
+        noResults: () => 'No se encontró ese país'
+      }
+    })
+  </script>
 
 </body>
 </html>

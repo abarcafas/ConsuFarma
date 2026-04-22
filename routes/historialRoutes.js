@@ -3,15 +3,19 @@ const router = express.Router()
 
 const {
   obtenerHistorial,
-  obtenerMensajes
+  obtenerMensajes,
+  eliminarConversacion
 } = require('../controllers/historialController')
 
 const { proteger } = require('../middlewares/authMiddleware')
 
-// 📌 historial del usuario
+// Historial del usuario
 router.get('/', proteger, obtenerHistorial)
 
-// 📌 mensajes de una conversación
+// Mensajes de una conversación
 router.get('/:id', proteger, obtenerMensajes)
+
+// Eliminar una conversación
+router.delete('/:id', proteger, eliminarConversacion)
 
 module.exports = router
