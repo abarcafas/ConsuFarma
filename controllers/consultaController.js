@@ -260,9 +260,16 @@ async function rehidratarMedicamento(med) {
   const updates = {}
   for (const { enKey, esKey } of faltantes) {
     const traducido = await traducirCampo(med[enKey], "en", "es")
-    // Solo actualizar si la traducción es diferente al inglés
+
     if (traducido && traducido.trim() !== med[enKey]?.trim()) {
+      // Traducción exitosa y diferente al inglés
       updates[esKey] = traducido
+    } else if (esKey === "generic_name_es" && med[enKey]) {
+      // Para el nombre genérico específicamente:
+      // si la traducción falla o devuelve lo mismo (ej: "ibuprofen" → "ibuprofen"),
+      // usar el nombre en inglés como fallback para que no quede null
+      console.log(`⚠️ generic_name_es: traducción igual al inglés, usando inglés como fallback: "${med[enKey]}"`)
+      updates[esKey] = med[enKey]
     }
   }
 
