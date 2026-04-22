@@ -85,6 +85,7 @@ const login = async (req, res) => {
       sameSite: 'strict',
       maxAge: 2 * 60 * 60 * 1000
     });
+    console.log('ROL DEL USUARIO:', usuario.rol)
 
     // 🔀 Redirección por palabra
     if (usuario.rol === 'admin') {

@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 
 const { registro, login } = require('../controllers/authController');
 const { autorizarRoles, proteger } = require('../middlewares/authMiddleware');
 
-// Ruta principal — dashboard siempre visible, autenticación manejada en frontend
+// Ruta principal — dashboard siempre visible
 router.get('/', (req, res) => {
   let usuario = null;
   try {
     const token = req.cookies.token;
     if (token) {
-      usuario = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+      usuario = jwt.verify(token, process.env.JWT_SECRET);
+      // Si es admin, redirigir al panel admin
+      if (usuario.rol === 'ADMIN') return res.redirect('/admin/dashboard');
     }
   } catch {
     res.clearCookie('token');
@@ -19,12 +22,12 @@ router.get('/', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-  // Si ya tiene sesión activa, redirigir al dashboard
   const token = req.cookies.token;
   if (token) {
     try {
-      require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
-      return res.redirect('/');
+      const usuario = jwt.verify(token, process.env.JWT_SECRET);
+      // Redirigir según rol
+      return res.redirect(usuario.rol === 'ADMIN' ? '/admin/dashboard' : '/');
     } catch {
       res.clearCookie('token');
     }
@@ -35,11 +38,10 @@ router.get('/login', (req, res) => {
 router.post('/login', login);
 
 router.get('/register', (req, res) => {
-  // Si ya tiene sesión activa, redirigir al dashboard
   const token = req.cookies.token;
   if (token) {
     try {
-      require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+      jwt.verify(token, process.env.JWT_SECRET);
       return res.redirect('/');
     } catch {
       res.clearCookie('token');
@@ -50,8 +52,9 @@ router.get('/register', (req, res) => {
 
 router.post('/registro', registro);
 
-// Dashboard usuario (mantener por compatibilidad)
+// Dashboard usuario — redirige admin si llega aquí
 router.get('/dashboard', proteger, autorizarRoles('usuario', 'admin'), (req, res) => {
+  if (req.usuario.rol === 'ADMIN') return res.redirect('/admin/dashboard');
   res.render('dashboard', { usuario: req.usuario, idioma: req.usuario.idioma });
 });
 

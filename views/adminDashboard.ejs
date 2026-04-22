@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediConsulta — Panel de Inteligencia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --verde-oscuro: #0D3D2E;
+      --verde-medio:  #1A5C42;
+      --verde-claro:  #E8F5EE;
+      --verde-muted:  #7A9E8C;
+      --dorado:       #C8973A;
+      --crema:        #F7F4EF;
+      --texto:        #1A1A1A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--crema);
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    #navbar {
+      background: var(--verde-oscuro);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 10px; }
+
+    .logo-box {
+      width: 34px; height: 34px;
+      background: var(--verde-medio);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .nav-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      color: white;
+    }
+
+    .nav-subtitle {
+      font-size: 9px;
+      color: var(--verde-muted);
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: block;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+
+    .btn-export {
+      padding: 7px 18px;
+      background: var(--dorado);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-export:hover { background: #b07e2a; }
+
+    .btn-logout {
+      padding: 7px 16px;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+    /* CONTENIDO */
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 20px 20px 40px;
+    }
+
+    /* FILTROS */
+    #filtros-bar {
+      background: white;
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    #filtros-bar label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--verde-muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-right: 2px;
+    }
+
+    #filtros-bar select,
+    #filtros-bar input[type="date"] {
+      padding: 6px 10px;
+      border: 1.5px solid #E0DDD6;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: 'Nunito', sans-serif;
+      color: var(--texto);
+      background: var(--crema);
+      cursor: pointer;
+      outline: none;
+    }
+
+    #filtros-bar select:focus,
+    #filtros-bar input:focus {
+      border-color: var(--verde-medio);
+    }
+
+    .filtro-sep {
+      width: 1px;
+      height: 24px;
+      background: #E0DDD6;
+      margin: 0 4px;
+    }
+
+    #btn-aplicar {
+      padding: 7px 20px;
+      background: var(--verde-oscuro);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background 0.2s;
+      margin-left: auto;
+    }
+    #btn-aplicar:hover { background: var(--verde-medio); }
+
+    /* KPI CARDS */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+
+    .kpi-card.destacado {
+      background: var(--verde-oscuro);
+    }
+
+    .kpi-label {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--verde-muted);
+      margin-bottom: 8px;
+    }
+
+    .kpi-card.destacado .kpi-label { color: var(--verde-muted); }
+
+    .kpi-valor {
+      font-family: 'Playfair Display', serif;
+      font-size: 34px;
+      color: var(--verde-oscuro);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .kpi-card.destacado .kpi-valor { color: white; font-size: 22px; }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--verde-muted);
+    }
+
+    .kpi-sub.up   { color: #1A5C42; }
+    .kpi-sub.down { color: #A32D2D; }
+    .kpi-card.destacado .kpi-sub { color: #A8D4BC; }
+
+    /* GRID PRINCIPAL */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .second-grid {
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .third-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    /* CARDS */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--verde-oscuro);
+      margin-bottom: 4px;
+    }
+
+    .card-sub {
+      font-size: 10px;
+      color: var(--verde-muted);
+      margin-bottom: 16px;
+    }
+
+    /* BARRA HORIZONTAL */
+    .bar-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .bar-nombre {
+      font-size: 12px;
+      color: var(--texto);
+      width: 110px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 10px;
+      background: var(--crema);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: var(--verde-oscuro);
+      transition: width 0.6s ease;
+    }
+
+    .bar-val {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--verde-oscuro);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* TABLA CRUCE */
+    .tabla-cruce {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .tabla-cruce th {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--verde-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid #E0DDD6;
+    }
+
+    .tabla-cruce td {
+      padding: 8px 8px;
+      border-bottom: 1px solid rgba(13,61,46,0.05);
+      color: var(--texto);
+    }
+
+    .tabla-cruce tr:last-child td { border-bottom: none; }
+
+    .pct-fem  { color: var(--verde-oscuro); font-weight: 700; }
+    .pct-masc { color: var(--verde-muted); }
+
+    /* ANÁLISIS MEDICAMENTO */
+    #analisis-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+
+    .analisis-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .analisis-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    #med-search-input {
+      padding: 7px 14px;
+      border: 1.5px solid #E0DDD6;
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: 'Nunito', sans-serif;
+      outline: none;
+      width: 220px;
+    }
+
+    #med-search-input:focus { border-color: var(--verde-medio); }
+
+    #med-suggestions {
+      position: absolute;
+      top: 36px;
+      left: 0;
+      background: white;
+      border: 1px solid #E0DDD6;
+      border-radius: 10px;
+      width: 220px;
+      z-index: 20;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      display: none;
+    }
+
+    .med-suggestion-item {
+      padding: 9px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(13,61,46,0.06);
+      color: var(--texto);
+    }
+
+    .med-suggestion-item:hover { background: var(--crema); }
+    .med-suggestion-item:last-child { border-bottom: none; }
+
+    .analisis-kpis {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .analisis-kpi {
+      background: var(--crema);
+      border-radius: 9px;
+      padding: 12px 14px;
+    }
+
+    .analisis-kpi-label {
+      font-size: 10px;
+      color: var(--verde-muted);
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .analisis-kpi-val {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--verde-oscuro);
+      margin-bottom: 2px;
+    }
+
+    .analisis-kpi-sub {
+      font-size: 10px;
+      color: var(--verde-muted);
+    }
+
+    .insight-box {
+      background: var(--verde-claro);
+      border-radius: 9px;
+      padding: 12px 16px;
+      border-left: 4px solid var(--verde-oscuro);
+      margin-top: 14px;
+      font-size: 12px;
+      color: #085041;
+      line-height: 1.6;
+    }
+
+    .insight-box strong { font-weight: 800; display: block; margin-bottom: 4px; }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 120px;
+      color: var(--verde-muted);
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid var(--verde-claro);
+      border-top-color: var(--verde-oscuro);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .kpi-grid    { grid-template-columns: 1fr 1fr; }
+      .main-grid   { grid-template-columns: 1fr; }
+      .second-grid { grid-template-columns: 1fr; }
+      .third-grid  { grid-template-columns: 1fr; }
+      .analisis-kpis { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .analisis-kpis { grid-template-columns: 1fr; }
+      #filtros-bar { flex-direction: column; align-items: flex-start; }
+      #btn-aplicar { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <div class="nav-left">
+      <div class="logo-box">
+        <svg viewBox="0 0 36 36" width="24" height="24">
+          <text x="18" y="18" text-anchor="middle" dominant-baseline="central"
+            font-size="22" font-weight="800" fill="white"
+            font-family="'Playfair Display', Georgia, serif"
+            transform="rotate(-90,18,18)">M</text>
+        </svg>
+      </div>
+      <div>
+        <span class="nav-title">MediConsulta</span>
+        <span class="nav-subtitle">Panel de inteligencia farmacéutica</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <span style="font-size:12px;color:#A8D4BC;">Admin: <%= usuario.nombre %></span>
+      <button class="btn-export" onclick="exportarCSV()">Exportar CSV</button>
+      <a href="/logout" class="btn-logout">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- FILTROS GLOBALES -->
+    <div id="filtros-bar">
+      <label>Modo fecha</label>
+      <select id="f-modo-fecha" onchange="toggleModoFecha()">
+        <option value="rango">Rango</option>
+        <option value="dia">Día específico</option>
+      </select>
+
+      <div id="filtro-rango" style="display:flex;align-items:center;gap:10px;">
+        <label>Desde</label>
+        <input type="date" id="f-desde">
+        <label>Hasta</label>
+        <input type="date" id="f-hasta">
+      </div>
+
+      <div id="filtro-dia" style="display:none;align-items:center;gap:10px;">
+        <label>Fecha</label>
+        <input type="date" id="f-dia">
+      </div>
+
+      <div class="filtro-sep"></div>
+      <label>Género</label>
+      <select id="f-genero">
+        <option value="">Todos</option>
+        <option value="Masculino">Masculino</option>
+        <option value="Femenino">Femenino</option>
+        <option value="Prefiero no decir">Prefiero no decir</option>
+      </select>
+      <label>País</label>
+      <select id="f-pais">
+        <option value="">Todos</option>
+        <option value="Costa Rica">Costa Rica</option>
+        <option value="México">México</option>
+        <option value="Colombia">Colombia</option>
+        <option value="Argentina">Argentina</option>
+        <option value="España">España</option>
+        <option value="Otro">Otro</option>
+      </select>
+      <label>Edad</label>
+      <select id="f-edad">
+        <option value="">Todos</option>
+        <option value="18,25">18-25</option>
+        <option value="26,35">26-35</option>
+        <option value="36,50">36-50</option>
+        <option value="51,120">50+</option>
+      </select>
+      <label>Idioma</label>
+      <select id="f-idioma">
+        <option value="">Todos</option>
+        <option value="Español">Español</option>
+        <option value="English">English</option>
+        <option value="Português">Português</option>
+        <option value="Français">Français</option>
+      </select>
+      <button id="btn-aplicar" onclick="cargarTodo()">Aplicar filtros</button>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="loading"><div class="spinner"></div> Cargando...</div>
+    </div>
+
+    <!-- FILA 1: Top medicamentos | Género | País -->
+    <div class="main-grid">
+      <div class="card" id="card-top">
+        <div class="card-title">Top medicamentos más buscados</div>
+        <div class="card-sub" id="sub-top">cargando...</div>
+        <div id="lista-top"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Búsquedas por género</div>
+        <div class="card-sub">distribución porcentual</div>
+        <canvas id="chart-genero" height="220"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Búsquedas por país</div>
+        <div class="card-sub">top países</div>
+        <div id="lista-pais"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- FILA 2: Tendencia temporal | Distribución edad -->
+    <div class="second-grid">
+      <div class="card">
+        <div class="card-title">Tendencia de búsquedas por mes</div>
+        <div class="card-sub">últimos 10 meses</div>
+        <canvas id="chart-tendencia" height="140"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Búsquedas por edad</div>
+        <div class="card-sub">rangos etarios</div>
+        <canvas id="chart-edad" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- FILA 3: Cruce género x medicamento -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title">Cruce: género × medicamento</div>
+      <div class="card-sub">top 5 medicamentos — distribución por género</div>
+      <div id="tabla-cruce"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- ANÁLISIS DE MEDICAMENTO ESPECÍFICO -->
+    <div id="analisis-card">
+      <div class="analisis-header">
+        <div>
+          <div class="card-title" id="analisis-titulo">Análisis de medicamento</div>
+          <div class="card-sub">selecciona un medicamento para ver su perfil completo</div>
+        </div>
+        <div class="analisis-search">
+          <input type="text" id="med-search-input" placeholder="Buscar medicamento...">
+          <div id="med-suggestions"></div>
+        </div>
+      </div>
+      <div id="analisis-contenido">
+        <div class="loading">
+          <span>Selecciona un medicamento para ver el análisis</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+
+  <script>
+    /* ========================
+       ESTADO Y HELPERS
+    ======================== */
+    let chartGenero   = null
+    let chartTendencia = null
+    let chartEdad     = null
+    let medicamentoSeleccionadoId   = null
+    let medicamentoSeleccionadoNombre = null
+    let datosExport = {}
+
+    function toggleModoFecha() {
+      const modo = document.getElementById('f-modo-fecha').value
+      document.getElementById('filtro-rango').style.display = modo === 'rango' ? 'flex' : 'none'
+      document.getElementById('filtro-dia').style.display   = modo === 'dia'   ? 'flex' : 'none'
+    }
+
+    function getFiltros() {
+      const edad = document.getElementById('f-edad').value
+      const [edad_min, edad_max] = edad ? edad.split(',') : ['', '']
+      const modo = document.getElementById('f-modo-fecha').value
+
+      let desde = '', hasta = ''
+      if (modo === 'dia') {
+        const dia = document.getElementById('f-dia').value
+        desde = dia
+        hasta = dia  // mismo día en desde y hasta → el helper incluye todo el día
+      } else {
+        desde = document.getElementById('f-desde').value
+        hasta = document.getElementById('f-hasta').value
+      }
+
+      return {
+        desde, hasta,
+        genero:   document.getElementById('f-genero').value,
+        pais:     document.getElementById('f-pais').value,
+        idioma:   document.getElementById('f-idioma').value,
+        edad_min, edad_max
+      }
+    }
+
+    function buildQuery(filtros) {
+      return Object.entries(filtros)
+        .filter(([, v]) => v)
+        .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+        .join('&')
+    }
+
+    async function fetchJSON(url) {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      return res.json()
+    }
+
+    /* ========================
+       KPIs
+    ======================== */
+    async function cargarKPIs(q) {
+      const grid = document.getElementById('kpi-grid')
+      grid.innerHTML = `<div class="loading" style="grid-column:1/-1"><div class="spinner"></div> Cargando...</div>`
+      try {
+        const d = await fetchJSON(`/api/admin/kpis?${q}`)
+        datosExport.kpis = d
+
+        const crec = d.crecimientoMensual
+        const crecClass = crec >= 0 ? 'up' : 'down'
+        const crecIcon  = crec >= 0 ? '↑' : '↓'
+
+        grid.innerHTML = `
+          <div class="kpi-card">
+            <div class="kpi-label">Búsquedas totales</div>
+            <div class="kpi-valor">${d.totalBusquedas.toLocaleString()}</div>
+            <div class="kpi-sub ${crecClass}">${crecIcon} ${Math.abs(crec)}% vs mes anterior</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Medicamentos únicos</div>
+            <div class="kpi-valor">${d.medicamentosUnicos.toLocaleString()}</div>
+            <div class="kpi-sub">consultados en el período</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Usuarios activos</div>
+            <div class="kpi-valor">${d.usuariosActivos.toLocaleString()}</div>
+            <div class="kpi-sub">con al menos 1 búsqueda</div>
+          </div>
+          <div class="kpi-card destacado">
+            <div class="kpi-label">Medicamento estrella</div>
+            <div class="kpi-valor">${d.medicamentoEstrella?.nombre || '—'}</div>
+            <div class="kpi-sub">${d.medicamentoEstrella?.total || 0} búsquedas en el período</div>
+          </div>
+        `
+      } catch (e) {
+        grid.innerHTML = `<div class="loading" style="grid-column:1/-1;color:#A32D2D;">Error cargando KPIs</div>`
+      }
+    }
+
+    /* ========================
+       TOP MEDICAMENTOS
+    ======================== */
+    async function cargarTop(q) {
+      const el = document.getElementById('lista-top')
+      const sub = document.getElementById('sub-top')
+      el.innerHTML = `<div class="loading"><div class="spinner"></div></div>`
+      try {
+        const data = await fetchJSON(`/api/admin/top-medicamentos?${q}&limit=10`)
+        datosExport.top = data
+        const max = data[0]?.total || 1
+        sub.textContent = `${data.length} medicamentos · período seleccionado`
+
+        el.innerHTML = data.map((m, i) => `
+          <div class="bar-item" style="cursor:pointer" onclick="seleccionarMedicamentoDesdeTop('${m.nombre_en}','${m.nombre}')">
+            <span class="bar-nombre" title="${m.nombre}">${i + 1}. ${m.nombre}</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${Math.round((m.total / max) * 100)}%;background:${i < 3 ? '#0D3D2E' : i < 6 ? '#1A5C42' : '#7A9E8C'}"></div>
+            </div>
+            <span class="bar-val">${parseInt(m.total).toLocaleString()}</span>
+          </div>
+        `).join('')
+      } catch (e) {
+        el.innerHTML = `<div class="loading" style="color:#A32D2D;">Error</div>`
+      }
+    }
+
+    // Seleccionar desde el top — busca el ID real por nombre
+    async function seleccionarMedicamentoDesdeTop(nombreEn, nombreMostrar) {
+      try {
+        const resultados = await fetchJSON(`/api/admin/buscar-medicamento?q=${encodeURIComponent(nombreEn)}`)
+        if (resultados.length) {
+          seleccionarMedicamento(resultados[0].id, nombreMostrar)
+        } else {
+          // Intentar con el nombre en español
+          const resultados2 = await fetchJSON(`/api/admin/buscar-medicamento?q=${encodeURIComponent(nombreMostrar)}`)
+          if (resultados2.length) {
+            seleccionarMedicamento(resultados2[0].id, nombreMostrar)
+          } else {
+            document.getElementById('analisis-contenido').innerHTML =
+              `<div class="loading" style="color:#A32D2D;">No se encontró el medicamento</div>`
+          }
+        }
+      } catch(e) {
+        console.error('Error buscando ID del medicamento:', e)
+      }
+    }
+
+    /* ========================
+       GÉNERO — PIE CHART
+    ======================== */
+    async function cargarGenero(q) {
+      try {
+        const data = await fetchJSON(`/api/admin/por-genero?${q}`)
+        datosExport.genero = data
+
+        const labels = data.map(d => d.genero)
+        const values = data.map(d => parseFloat(d.porcentaje))
+        const colors = ['#0D3D2E', '#7A9E8C', '#C8973A', '#E0DDD6']
+
+        if (chartGenero) chartGenero.destroy()
+        const ctx = document.getElementById('chart-genero').getContext('2d')
+        chartGenero = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom', labels: { font: { family: 'Nunito', size: 11 }, padding: 12 } },
+              tooltip: {
+                callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` }
+              }
+            }
+          }
+        })
+      } catch(e) { console.error('Error género:', e) }
+    }
+
+    /* ========================
+       PAÍS — BARRAS
+    ======================== */
+    async function cargarPais(q) {
+      const el = document.getElementById('lista-pais')
+      el.innerHTML = `<div class="loading"><div class="spinner"></div></div>`
+      try {
+        const data = await fetchJSON(`/api/admin/por-pais?${q}`)
+        datosExport.pais = data
+        const max = data[0]?.porcentaje || 1
+
+        el.innerHTML = data.map(p => `
+          <div class="bar-item">
+            <span class="bar-nombre">${p.pais}</span>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${Math.round((p.porcentaje / max) * 100)}%"></div>
+            </div>
+            <span class="bar-val">${p.porcentaje}%</span>
+          </div>
+        `).join('')
+      } catch(e) {
+        el.innerHTML = `<div class="loading" style="color:#A32D2D;">Error</div>`
+      }
+    }
+
+    /* ========================
+       TENDENCIA — LINE CHART
+    ======================== */
+    async function cargarTendencia(q) {
+      try {
+        const data = await fetchJSON(`/api/admin/tendencia?${q}&meses=10`)
+        datosExport.tendencia = data
+
+        if (chartTendencia) chartTendencia.destroy()
+        const ctx = document.getElementById('chart-tendencia').getContext('2d')
+        chartTendencia = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.map(d => d.mes),
+            datasets: [{
+              label: 'Búsquedas',
+              data: data.map(d => parseInt(d.total)),
+              borderColor: '#0D3D2E',
+              backgroundColor: 'rgba(13,61,46,0.07)',
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#0D3D2E',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: 'Nunito', size: 11 } } },
+              x: { grid: { display: false }, ticks: { font: { family: 'Nunito', size: 11 } } }
+            }
+          }
+        })
+      } catch(e) { console.error('Error tendencia:', e) }
+    }
+
+    /* ========================
+       EDAD — BAR CHART
+    ======================== */
+    async function cargarEdad(q) {
+      try {
+        const data = await fetchJSON(`/api/admin/por-edad?${q}`)
+        datosExport.edad = data
+
+        if (chartEdad) chartEdad.destroy()
+        const ctx = document.getElementById('chart-edad').getContext('2d')
+        chartEdad = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.map(d => d.rango_edad),
+            datasets: [{
+              data: data.map(d => parseFloat(d.porcentaje)),
+              backgroundColor: ['#0D3D2E', '#0D3D2E', '#1A5C42', '#C8973A'],
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false },
+              tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}%` } }
+            },
+            scales: {
+              y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: 'Nunito', size: 11 }, callback: v => v + '%' } },
+              x: { grid: { display: false }, ticks: { font: { family: 'Nunito', size: 11 } } }
+            }
+          }
+        })
+      } catch(e) { console.error('Error edad:', e) }
+    }
+
+    /* ========================
+       CRUCE GÉNERO x MED
+    ======================== */
+    async function cargarCruce(q) {
+      const el = document.getElementById('tabla-cruce')
+      el.innerHTML = `<div class="loading"><div class="spinner"></div></div>`
+      try {
+        const data = await fetchJSON(`/api/admin/cruce-genero?${q}&limit=5`)
+        datosExport.cruce = data
+
+        el.innerHTML = `
+          <table class="tabla-cruce">
+            <thead>
+              <tr>
+                <th>Medicamento</th>
+                <th>Total</th>
+                <th>% Femenino</th>
+                <th>% Masculino</th>
+                <th>% Otro</th>
+                <th>Tendencia visual</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(d => `
+                <tr>
+                  <td style="font-weight:700;">${d.nombre}</td>
+                  <td>${parseInt(d.total).toLocaleString()}</td>
+                  <td class="pct-fem">${d.pct_femenino}%</td>
+                  <td class="pct-masc">${d.pct_masculino}%</td>
+                  <td style="color:#C8973A;">${d.pct_otro}%</td>
+                  <td>
+                    <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;width:140px;">
+                      <div style="width:${d.pct_femenino}%;background:#0D3D2E;"></div>
+                      <div style="width:${d.pct_masculino}%;background:#7A9E8C;"></div>
+                      <div style="width:${d.pct_otro}%;background:#C8973A;"></div>
+                    </div>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `
+      } catch(e) {
+        el.innerHTML = `<div class="loading" style="color:#A32D2D;">Error</div>`
+      }
+    }
+
+    /* ========================
+       ANÁLISIS MEDICAMENTO
+    ======================== */
+    async function cargarAnalisis(id) {
+      const el = document.getElementById('analisis-contenido')
+      el.innerHTML = `<div class="loading"><div class="spinner"></div> Cargando análisis...</div>`
+      const q = buildQuery(getFiltros())
+      try {
+        const d = await fetchJSON(`/api/admin/medicamento/${id}?${q}`)
+
+        document.getElementById('analisis-titulo').textContent = `Análisis: ${d.nombre}`
+
+        el.innerHTML = `
+          <div class="analisis-kpis">
+            <div class="analisis-kpi">
+              <div class="analisis-kpi-label">Total búsquedas</div>
+              <div class="analisis-kpi-val">${d.total.toLocaleString()}</div>
+            </div>
+            <div class="analisis-kpi">
+              <div class="analisis-kpi-label">Perfil principal</div>
+              <div class="analisis-kpi-val">${d.perfilPrincipal ? `${d.perfilPrincipal.genero} ${d.perfilPrincipal.rango_edad}` : '—'}</div>
+              <div class="analisis-kpi-sub">${d.perfilPrincipal?.pais || ''}</div>
+            </div>
+            <div class="analisis-kpi">
+              <div class="analisis-kpi-label">Mes pico</div>
+              <div class="analisis-kpi-val">${d.mesPico?.mes || '—'}</div>
+              <div class="analisis-kpi-sub">${d.mesPico?.total || 0} búsquedas</div>
+            </div>
+            <div class="analisis-kpi">
+              <div class="analisis-kpi-label">Idioma dominante</div>
+              <div class="analisis-kpi-val">${d.idiomaDominante === 'es' ? 'Español' : d.idiomaDominante === 'en' ? 'English' : d.idiomaDominante || '—'}</div>
+            </div>
+            <div class="analisis-kpi">
+              <div class="analisis-kpi-label">País líder</div>
+              <div class="analisis-kpi-val">${d.paisLider?.pais || '—'}</div>
+              <div class="analisis-kpi-sub">${d.paisLider?.porcentaje || 0}% de búsquedas</div>
+            </div>
+          </div>
+          <div class="insight-box">
+            <strong>Insight de mercado</strong>
+            ${d.nombre} tiene ${d.total.toLocaleString()} búsquedas en el período.
+            ${d.perfilPrincipal ? `El perfil que más lo consulta son ${d.perfilPrincipal.genero.toLowerCase()}s de ${d.perfilPrincipal.rango_edad} años en ${d.perfilPrincipal.pais}.` : ''}
+            ${d.mesPico ? `Su pico de demanda fue en ${d.mesPico.mes} con ${parseInt(d.mesPico.total).toLocaleString()} búsquedas.` : ''}
+            ${d.paisLider ? `${d.paisLider.pais} concentra el ${d.paisLider.porcentaje}% de todas las consultas.` : ''}
+          </div>
+        `
+      } catch(e) {
+        el.innerHTML = `<div class="loading" style="color:#A32D2D;">Error cargando análisis</div>`
+      }
+    }
+
+    /* ========================
+       AUTOCOMPLETE MEDICAMENTO
+    ======================== */
+    let searchTimeout = null
+    const searchInput = document.getElementById('med-search-input')
+    const suggestions = document.getElementById('med-suggestions')
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimeout)
+      const q = searchInput.value.trim()
+      if (q.length < 2) { suggestions.style.display = 'none'; return }
+
+      searchTimeout = setTimeout(async () => {
+        try {
+          const data = await fetchJSON(`/api/admin/buscar-medicamento?q=${encodeURIComponent(q)}`)
+          if (!data.length) { suggestions.style.display = 'none'; return }
+          suggestions.innerHTML = data.map(m => `
+            <div class="med-suggestion-item" onclick="seleccionarMedicamento('${m.id}','${m.nombre}')">
+              ${m.nombre}
+            </div>
+          `).join('')
+          suggestions.style.display = 'block'
+        } catch(e) { suggestions.style.display = 'none' }
+      }, 300)
+    })
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.analisis-search')) suggestions.style.display = 'none'
+    })
+
+    function seleccionarMedicamento(id, nombre) {
+      medicamentoSeleccionadoId = id
+      medicamentoSeleccionadoNombre = nombre
+      searchInput.value = nombre
+      suggestions.style.display = 'none'
+      cargarAnalisis(id)
+    }
+
+    /* ========================
+       EXPORTAR CSV
+    ======================== */
+    function exportarCSV() {
+      const rows = []
+      rows.push(['MEDICAMENTOS MÁS BUSCADOS'])
+      rows.push(['Posición', 'Medicamento', 'Búsquedas', '% del total'])
+      ;(datosExport.top || []).forEach((m, i) => {
+        rows.push([i + 1, m.nombre, m.total, m.porcentaje + '%'])
+      })
+
+      rows.push([])
+      rows.push(['DISTRIBUCIÓN POR GÉNERO'])
+      rows.push(['Género', 'Total', '%'])
+      ;(datosExport.genero || []).forEach(g => {
+        rows.push([g.genero, g.total, g.porcentaje + '%'])
+      })
+
+      rows.push([])
+      rows.push(['DISTRIBUCIÓN POR PAÍS'])
+      rows.push(['País', 'Total', '%'])
+      ;(datosExport.pais || []).forEach(p => {
+        rows.push([p.pais, p.total, p.porcentaje + '%'])
+      })
+
+      const csv = rows.map(r => r.join(',')).join('\n')
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href = url
+      a.download = `mediconsulta-datos-${new Date().toISOString().slice(0,10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
+
+    /* ========================
+       CARGAR TODO
+    ======================== */
+    function cargarTodo() {
+      const q = buildQuery(getFiltros())
+      cargarKPIs(q)
+      cargarTop(q)
+      cargarGenero(q)
+      cargarPais(q)
+      cargarTendencia(q)
+      cargarEdad(q)
+      cargarCruce(q)
+      if (medicamentoSeleccionadoId) cargarAnalisis(medicamentoSeleccionadoId)
+    }
+
+    // Cargar al inicio
+    cargarTodo()
+  </script>
+
+</body>
+</html>
