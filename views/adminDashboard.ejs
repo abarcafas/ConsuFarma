@@ -163,6 +163,20 @@
     }
     #btn-aplicar:hover { background: var(--verde-medio); }
 
+    #btn-limpiar {
+      padding: 7px 16px;
+      background: transparent;
+      color: var(--verde-muted);
+      border: 1.5px solid #E0DDD6;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s;
+    }
+    #btn-limpiar:hover { background: var(--crema); color: var(--verde-oscuro); border-color: var(--verde-muted); }
+
     /* KPI CARDS */
     .kpi-grid {
       display: grid;
@@ -483,7 +497,7 @@
       </div>
       <div>
         <span class="nav-title">MediConsulta</span>
-        <span class="nav-subtitle">Panel de inteligencia farmacéutica</span>
+        <span class="nav-subtitle">Panel Administrativo</span>
       </div>
     </div>
     <div class="nav-right">
@@ -589,6 +603,7 @@
         <option value="Español">Español</option>
         <option value="English">English</option>
       </select>
+      <button id="btn-limpiar" onclick="limpiarFiltros()">✕ Limpiar</button>
       <button id="btn-aplicar" onclick="cargarTodo()">Aplicar filtros</button>
     </div>
 
@@ -1100,6 +1115,29 @@
       a.download = `mediconsulta-datos-${new Date().toISOString().slice(0,10)}.csv`
       a.click()
       URL.revokeObjectURL(url)
+    }
+
+    /* ========================
+       LIMPIAR FILTROS
+    ======================== */
+    function limpiarFiltros() {
+      // Fechas
+      document.getElementById('f-desde').value = ''
+      document.getElementById('f-hasta').value = ''
+      document.getElementById('f-dia').value   = ''
+      document.getElementById('f-modo-fecha').value = 'rango'
+      toggleModoFecha()
+
+      // Selects normales
+      document.getElementById('f-genero').value = ''
+      document.getElementById('f-edad').value   = ''
+      document.getElementById('f-idioma').value = ''
+
+      // Select2 para país
+      $('#f-pais').val('').trigger('change')
+
+      // Recargar todo sin filtros
+      cargarTodo()
     }
 
     /* ========================

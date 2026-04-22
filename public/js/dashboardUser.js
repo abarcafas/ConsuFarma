@@ -24,20 +24,20 @@ const traducciones = {
     dosificacion:    "Dosificación",
     advertencias:    "Advertencias",
     especial:        "Info especial",
-    placeholder:     "Busca un medicamento, principio activo o marca...",
+    placeholder:     "Busca un medicamento...",
     buscando:        "Consultando...",
     error:           "Error al consultar el medicamento. Intenta de nuevo.",
     sinFiltro:       "Selecciona al menos una categoría antes de buscar.",
     noEncontrado:    "Medicamento no encontrado",
     noEncontradoSub: "Verifica el nombre e intenta de nuevo.",
     historial:       "Historial reciente",
-    asistente:       "Asistente de medicamentos",
+    asistente:       "Información farmacéutica",
     enviar:          "Buscar",
     nueva:           "Nueva consulta",
     notaPie:         "Esta información es educativa. Consulte siempre a su médico o farmacéutico.",
-    selCategoria:    "Selecciona una categoría",
-    heroTitulo:      "Consulta cualquier medicamento",
-    heroSub:         "Información confiable al instante — dosificación, efectos e indicaciones"
+    selCategoria:    "Categorias",
+    heroTitulo:      "Consulta medicamentos",
+    heroSub:         "Información al instante — dosificación, efectos e indicaciones"
   },
   en: {
     tituloInicio:    "Select a category and search",
@@ -47,20 +47,20 @@ const traducciones = {
     dosificacion:    "Dosage",
     advertencias:    "Warnings",
     especial:        "Special info",
-    placeholder:     "Search for a medicine, active ingredient or brand...",
+    placeholder:     "Search for a medicine...",
     buscando:        "Consulting...",
     error:           "Error consulting medicine. Please try again.",
     sinFiltro:       "Select at least one category before searching.",
     noEncontrado:    "Medicine not found",
     noEncontradoSub: "Check the name and try again.",
     historial:       "Recent history",
-    asistente:       "Medicine assistant",
+    asistente:       "Pharmaceutical information",
     enviar:          "Search",
     nueva:           "New search",
     notaPie:         "This information is educational. Always consult your doctor or pharmacist.",
-    selCategoria:    "Select a category",
-    heroTitulo:      "Look up any medication",
-    heroSub:         "Reliable information instantly — dosage, effects and indications"
+    selCategoria:    "Category",
+    heroTitulo:      "Look for medication",
+    heroSub:         "Information instantly — dosage, effects and indications"
   }
 }
 
@@ -75,7 +75,9 @@ function aplicarIdioma() {
 
   set("subtituloHeader", tx.asistente)
   set("heroLabel",       tx.selCategoria)
-
+set("heroTitulo",      tx.heroTitulo)
+  set("heroSubtitulo",   tx.heroSub)
+  
   if (input) input.placeholder = tx.placeholder
   if (boton) boton.textContent  = tx.enviar
 
